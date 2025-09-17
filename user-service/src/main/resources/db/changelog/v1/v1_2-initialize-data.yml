@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: v1_2-initialize-users
+      author: Novogrodsky Dmitry
+      changes:
+        - loadData:
+            file: db/changelog/data/users.csv
+            tableName: users
+            separator: ","
+            encoding: UTF-8
+
+  - changeSet:
+      id: v1_2-initialize-card-info
+      author: Novogrodsky Dmitry
+      changes:
+        - loadData:
+            file: db/changelog/data/card_info.csv
+            tableName: card_info
+            separator: ","
+            encoding: UTF-8
+
