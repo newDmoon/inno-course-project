@@ -36,7 +36,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
             UserNotFoundException.class,
             CardNotFoundException.class
     })
-    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
+    public ResponseEntity<Object> handleNotFoundException(RuntimeException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", ex.getMessage());
         errors.put("timestamp", LocalDateTime.now().toString());
@@ -44,7 +44,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<Object> handleUserAlreadyExistsException(UserNotFoundException ex, WebRequest request) {
+    public ResponseEntity<Object> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", ex.getMessage());
         errors.put("timestamp", LocalDateTime.now().toString());
