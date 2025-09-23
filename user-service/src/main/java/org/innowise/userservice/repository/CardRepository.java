@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CardRepository extends JpaRepository<Card, Long> {
+    boolean existsById(Long id);
     Optional<Card> findByNumber(String number);
 
     @Modifying(clearAutomatically = true)

@@ -7,16 +7,13 @@ import org.innowise.userservice.mapper.CardMapper;
 import org.innowise.userservice.model.dto.CardResponse;
 import org.innowise.userservice.model.dto.CreateCardRequest;
 import org.innowise.userservice.model.dto.UpdateCardRequest;
-import org.innowise.userservice.model.dto.UserResponse;
 import org.innowise.userservice.model.entity.Card;
 import org.innowise.userservice.model.entity.User;
 import org.innowise.userservice.repository.CardRepository;
 import org.innowise.userservice.repository.UserRepository;
 import org.innowise.userservice.service.CardService;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-import java.net.UnknownServiceException;
 import java.util.List;
 
 @Service
@@ -59,6 +56,9 @@ public class CustomCardService implements CardService {
 
     @Override
     public boolean deleteCardById(Long id) {
+        if (!cardRepository.existsById(id)) {
+            throw new CardNotFoundException(id);
+        }
         cardRepository.deleteById(id);
         return !cardRepository.existsById(id);
     }

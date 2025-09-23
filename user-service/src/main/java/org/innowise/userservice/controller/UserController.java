@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController("/api/user-service/users")
+@RestController
+@RequestMapping("/api/user-service/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -31,19 +33,19 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") Long id) {
         UserResponse user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/some-users")
-    public ResponseEntity<List<UserResponse>> getUsersByIds(@RequestParam List<Long> ids) {
+    public ResponseEntity<List<UserResponse>> getUsersByIds(@RequestParam("ids") List<Long> ids) {
         List<UserResponse> users = userService.getUsersByIds(ids);
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable("email") String email) {
         UserResponse user = userService.getUserByEmail(email);
         return ResponseEntity.ok(user);
     }
@@ -55,7 +57,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }

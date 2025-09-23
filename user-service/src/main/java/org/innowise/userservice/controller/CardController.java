@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController("/api/user-service/cards")
+@RestController
+@RequestMapping("/api/user-service/cards")
 @RequiredArgsConstructor
 public class CardController {
     private final CardService cardService;
@@ -31,13 +33,13 @@ public class CardController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CardResponse> getCardById(@PathVariable Long id) {
+    public ResponseEntity<CardResponse> getCardById(@PathVariable("id") Long id) {
         CardResponse card = cardService.getCardById(id);
         return ResponseEntity.ok(card);
     }
 
     @GetMapping("/some-cards")
-    public ResponseEntity<List<CardResponse>> getCardsByIds(@RequestParam List<Long> ids) {
+    public ResponseEntity<List<CardResponse>> getCardsByIds(@RequestParam("ids") List<Long> ids) {
         List<CardResponse> cards = cardService.getCardsByIds(ids);
         return ResponseEntity.ok(cards);
     }
@@ -49,7 +51,7 @@ public class CardController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCard(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCard(@PathVariable("id") Long id) {
         cardService.deleteCardById(id);
         return ResponseEntity.noContent().build();
     }

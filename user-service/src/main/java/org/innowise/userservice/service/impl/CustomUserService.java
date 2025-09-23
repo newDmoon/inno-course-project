@@ -56,14 +56,19 @@ public class CustomUserService implements UserService {
     @Override
     @Transactional
     public void updateUserById(UpdateUserRequest updateUserRequest) {
-        User exitingUser = userRepository.findById(updateUserRequest.id()).orElseThrow(UserNotFoundException::new);
-        userMapper.updateUserFromDto(updateUserRequest, exitingUser);
-        userRepository.save(exitingUser);
+        User existingUser = userRepository.findById(updateUserRequest.id())
+                .orElseThrow(UserNotFoundException::new);
+
+        userMapper.updateUserFromDto(updateUserRequest, existingUser);
+        userRepository.save(existingUser);
     }
 
     @Override
     @Transactional
     public boolean deleteUserById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException();
+        }
         userRepository.deleteById(id);
         return !userRepository.existsById(id);
     }
