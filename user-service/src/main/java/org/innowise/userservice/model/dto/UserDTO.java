@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record UserDTO(
         Long id,
@@ -18,5 +19,6 @@ public record UserDTO(
         String name,
         @Size(max = 100, message = "Surname cannot exceed 100 characters")
         String surname,
-        LocalDate birthDate
+        LocalDate birthDate,
+        List<CardDTO> cards
 ) {}

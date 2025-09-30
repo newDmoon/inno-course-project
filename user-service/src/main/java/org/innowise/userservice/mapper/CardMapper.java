@@ -6,12 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface CardMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(source = "userId", target = "user.id")
     Card toEntity(CardDTO cardDTO);
 
     @Mapping(source = "user.id", target = "userId")

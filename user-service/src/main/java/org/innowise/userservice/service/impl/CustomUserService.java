@@ -11,6 +11,9 @@ import org.innowise.userservice.model.dto.UserFilterDTO;
 import org.innowise.userservice.model.entity.User;
 import org.innowise.userservice.repository.UserRepository;
 import org.innowise.userservice.service.UserService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +29,7 @@ public class CustomUserService implements UserService {
     private final UserMapper userMapper;
 
     @Override
+    @CachePut(value = "users")
     public UserDTO createUser(UserDTO createUserRequest) {
         if (userRepository.existsByEmail(createUserRequest.email())) {
             throw new AlreadyExistsException();
@@ -37,8 +41,9 @@ public class CustomUserService implements UserService {
     }
 
     @Override
+    @Cacheable(value = "users")
     public UserDTO getUserById(Long id) {
-        User foundUser = userRepository.findById(id).orElseThrow(NotFoundException::new);
+        User foundUser = userRepository.findById(id).orElseThrow(NotFoundException::new);;
         return userMapper.toDto(foundUser);
     }
 
@@ -50,16 +55,19 @@ public class CustomUserService implements UserService {
 
     @Override
     @Transactional
-    public void updateUserById(UserDTO updateUserRequest) {
+    @CachePut(value = "users", key = "#result.id()")
+    public UserDTO updateUserById(UserDTO updateUserRequest) {
         User existingUser = userRepository.findById(updateUserRequest.id())
                 .orElseThrow(NotFoundException::new);
 
         userMapper.updateUserFromDto(updateUserRequest, existingUser);
-        userRepository.save(existingUser);
+        User updatedUser = userRepository.save(existingUser);
+        return userMapper.toDto(updatedUser);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "users")
     public boolean deleteUserById(Long id) {
         if (!userRepository.existsById(id)) {
             throw new NotFoundException();

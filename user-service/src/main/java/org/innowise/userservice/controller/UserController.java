@@ -95,14 +95,14 @@ public class UserController {
      * Validates the request body and performs a full update of the user data.
      *
      * @param updateUserRequest the updated user data (must be valid and not {@code null})
-     * @return {@link ResponseEntity} with no content and HTTP status 204 (NO_CONTENT)
+     * @return {@link ResponseEntity} containing the updated user data with HTTP status 200 (OK)
      * @throws NotFoundException if no user exists with the given ID
      * @apiNote Example: PUT /api/v1/users
      */
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO updateUserRequest) {
-        userService.updateUserById(updateUserRequest);
-        return ResponseEntity.noContent().build();
+        UserDTO updatedUser = userService.updateUserById(updateUserRequest);
+        return ResponseEntity.ok(updatedUser);
     }
 
     /**

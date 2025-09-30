@@ -8,10 +8,9 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = CardMapper.class)
 public interface UserMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "cards", ignore = true)
     User toEntity(UserDTO createUserRequest);
 
     UserDTO toDto(User user);

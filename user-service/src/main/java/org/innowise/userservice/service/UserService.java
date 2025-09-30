@@ -41,8 +41,9 @@ public interface UserService {
      *
      * @param updateUserRequest the user data transfer object containing
      *        the updated information and user identifier
+     * @return {@link UserDTO} containing updated user information
      */
-    void updateUserById(UserDTO updateUserRequest);
+    UserDTO updateUserById(UserDTO updateUserRequest);
 
     /**
      * Deletes a user by their unique identifier.
