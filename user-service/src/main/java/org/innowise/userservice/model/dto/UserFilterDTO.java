@@ -1,10 +1,8 @@
 package org.innowise.userservice.model.dto;
 
-import lombok.Data;
-
-import java.util.ArrayList;
+import java.util.List;
 
 public record UserFilterDTO(
-        ArrayList<Long> ids,
+        List<Long> ids,
         String email
 ) {}

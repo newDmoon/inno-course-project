@@ -2,7 +2,6 @@ package org.innowise.userservice.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.innowise.userservice.exception.AlreadyExistsException;
 import org.innowise.userservice.exception.NotFoundException;
 import org.innowise.userservice.mapper.UserMapper;
@@ -11,6 +10,7 @@ import org.innowise.userservice.model.dto.UserFilterDTO;
 import org.innowise.userservice.model.entity.User;
 import org.innowise.userservice.repository.UserRepository;
 import org.innowise.userservice.service.UserService;
+import org.innowise.userservice.util.ApplicationConstant;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,14 +22,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class CustomUserService implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     @Override
-    @CachePut(value = "users")
+    @CachePut(value = ApplicationConstant.USERS, key = "#result.id()")
     public UserDTO createUser(UserDTO createUserRequest) {
         if (userRepository.existsByEmail(createUserRequest.email())) {
             throw new AlreadyExistsException();
@@ -41,9 +40,11 @@ public class CustomUserService implements UserService {
     }
 
     @Override
-    @Cacheable(value = "users")
+    @Cacheable(value = ApplicationConstant.USERS, key = "#id")
     public UserDTO getUserById(Long id) {
-        User foundUser = userRepository.findById(id).orElseThrow(NotFoundException::new);;
+        User foundUser = userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(id));
+
         return userMapper.toDto(foundUser);
     }
 
@@ -55,10 +56,10 @@ public class CustomUserService implements UserService {
 
     @Override
     @Transactional
-    @CachePut(value = "users", key = "#result.id()")
+    @CachePut(value = ApplicationConstant.USERS, key = "#result.id()")
     public UserDTO updateUserById(UserDTO updateUserRequest) {
         User existingUser = userRepository.findById(updateUserRequest.id())
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(updateUserRequest.id()));
 
         userMapper.updateUserFromDto(updateUserRequest, existingUser);
         User updatedUser = userRepository.save(existingUser);
@@ -67,10 +68,10 @@ public class CustomUserService implements UserService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "users")
+    @CacheEvict(value = ApplicationConstant.USERS, key = "#id")
     public boolean deleteUserById(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new NotFoundException();
+            throw new NotFoundException(id);
         }
         userRepository.deleteById(id);
         return !userRepository.existsById(id);

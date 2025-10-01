@@ -1,4 +1,4 @@
-package org.innowise.userservice.exception.advice;
+package org.innowise.userservice.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
