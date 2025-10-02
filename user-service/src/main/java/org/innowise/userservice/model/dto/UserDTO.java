@@ -4,10 +4,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Builder
 public record UserDTO(
         Long id,
         @NotNull(message = "Email is required")
