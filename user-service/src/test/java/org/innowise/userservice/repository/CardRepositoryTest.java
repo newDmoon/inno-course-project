@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-public class CardRepositoryTest {
+class CardRepositoryTest {
     @Autowired
     private CardRepository cardRepository;
     @Autowired
@@ -34,7 +34,7 @@ public class CardRepositoryTest {
     private User testUser2;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testUser1 = new User();
         testUser1.setEmail("dim@mail.com");
         testUser1.setName("D");
@@ -63,7 +63,7 @@ public class CardRepositoryTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         cardRepository.deleteAll();
     }
 

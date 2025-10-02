@@ -30,7 +30,7 @@ class UserRepositoryTest {
     private User testUser2;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testUser = new User();
         testUser.setEmail("test1@example.com");
         testUser.setName("Dmitry");
@@ -45,7 +45,7 @@ class UserRepositoryTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         userRepository.deleteAll();
     }
 

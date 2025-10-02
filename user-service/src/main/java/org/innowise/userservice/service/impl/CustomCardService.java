@@ -10,6 +10,10 @@ import org.innowise.userservice.model.entity.User;
 import org.innowise.userservice.repository.CardRepository;
 import org.innowise.userservice.repository.UserRepository;
 import org.innowise.userservice.service.CardService;
+import org.innowise.userservice.util.ApplicationConstant;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +28,7 @@ public class CustomCardService implements CardService {
     private final UserRepository userRepository;
 
     @Override
+    @CachePut(value = ApplicationConstant.CARDS, key = "#result.id()")
     public CardDTO createCard(CardDTO cardDTO) {
         User user = userRepository.findById(cardDTO.userId()).orElseThrow(NotFoundException::new);
         Card newCard = cardMapper.toEntity(cardDTO);
@@ -33,12 +38,14 @@ public class CustomCardService implements CardService {
     }
 
     @Override
+    @Cacheable(value = ApplicationConstant.CARDS, key = "#id")
     public CardDTO getCardById(Long id) {
         Card foundCard = cardRepository.findById(id).orElseThrow(NotFoundException::new);
         return cardMapper.toDto(foundCard);
     }
 
     @Override
+    @Cacheable(value = ApplicationConstant.CARDS, key = "#updateCardRequest.id()")
     public void updateCardById(CardDTO updateCardRequest) {
         Card exiting = cardRepository.findById(updateCardRequest.id()).orElseThrow(NotFoundException::new);
         cardMapper.updateCardFromDto(updateCardRequest, exiting);
@@ -46,6 +53,7 @@ public class CustomCardService implements CardService {
     }
 
     @Override
+    @CacheEvict(value = ApplicationConstant.CARDS, key = "#id")
     public boolean deleteCardById(Long id) {
         if (!cardRepository.existsById(id)) {
             throw new NotFoundException(id.toString());

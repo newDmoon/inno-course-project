@@ -1,4 +1,4 @@
-package org.innowise.userservice.exception.advice;
+package org.innowise.userservice.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -22,10 +22,10 @@ import java.util.List;
 @RestControllerAdvice
 @Slf4j
 public class GeneralExceptionHandler {
-    private final String NO_ENDPOINT_FOUND = "No endpoint found for %s %s";
+    private static final String NO_ENDPOINT_FOUND = "No endpoint found for %s %s";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex,
+    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException ex,
                                                         HttpServletRequest request) {
         log.error("Validation error occurred: {}", ex.getMessage());
 

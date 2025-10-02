@@ -16,4 +16,6 @@ public class ErrorConstant {
     public static final String VALIDATION_ERROR_CODE = "VALIDATION";
     public static final String CONFLICT_ERROR_CODE = "CONFLICT";
     public static final String INTERNAL_ERROR_CODE = "INTERNAL_ERROR";
+
+    public static final String ENTITY_WITH_ID_NOT_FOUND = "Entity with id %d not found";
 }
