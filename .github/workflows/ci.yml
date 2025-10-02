@@ -6,10 +6,27 @@ on:
       - main
       - USR-7/testing
 
+  push:
+    branches:
+      - main
+      - USR-7/testing
+      - USR-8/CI
+
 jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
 
     steps:
       - name: Checkout code
