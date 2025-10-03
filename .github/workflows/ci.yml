@@ -66,8 +66,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Build and run SonarQube analysis
-        run: mvn clean verify sonar:sonar -DskipTests
+        run: mvn clean verify sonar:sonar -DskipTests -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
