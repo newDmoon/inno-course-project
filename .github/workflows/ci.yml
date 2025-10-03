@@ -66,13 +66,14 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Run tests with coverage
-        run: mvn clean test jacoco:report
+        run: mvn clean test verify
 
       - name: Build and run SonarQube analysis
         run: |
-          mvn clean verify sonar:sonar -DskipTests \
-          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-          -Dsonar.projectKey=newDmoon_inno-course-project
+          mvn sonar:sonar \
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+            -Dsonar.projectKey=newDmoon_inno-course-project \
+            -Dsonar.coverage.jacoco.xmlReportPaths=user-service/target/site/jacoco/jacoco.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
