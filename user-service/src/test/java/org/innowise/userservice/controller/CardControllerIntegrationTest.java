@@ -46,31 +46,17 @@ class CardControllerIntegrationTest {
     }
 
     @Test
-    void getUsers_WhenNoUsersExist_ReturnsEmptyPage() throws JsonProcessingException {
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                baseUrl + "?page=0&size=10", String.class);
+    void getUsers_WhenNoUsersExist_ReturnsEmptyPage() {
+        ResponseEntity<String> response = restTemplate.getForEntity(baseUrl + "?page=0&size=10", String.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-
-//        ObjectMapper mapper = new ObjectMapper();
-//        JsonNode root = mapper.readTree(response.getBody());
-//        JsonNode content = root.get("content");
-//
-//        assertEquals(0, content.size());
-//        assertEquals(0, root.get("totalElements").asInt());
     }
 
     @Test
     void createCard_WhenValidDataProvided_ReturnsCreatedCardDTO() {
         Long userId = createTestUser();
 
-        CardDTO cardRequest = new CardDTO(
-                null,
-                userId,
-                "7777777777777777",
-                "Dmitry Popov",
-                LocalDate.now().plusYears(2)
-        );
+        CardDTO cardRequest = new CardDTO(null, userId, "7777777777777777", "Dmitry Popov", LocalDate.now().plusYears(2));
 
         ResponseEntity<CardDTO> response = restTemplate.postForEntity(baseUrl, cardRequest, CardDTO.class);
 
@@ -84,13 +70,7 @@ class CardControllerIntegrationTest {
     void createCard_WhenInvalidDataProvided_ReturnsBadRequest() {
         Long userId = createTestUser();
 
-        CardDTO invalidCard = new CardDTO(
-                null,
-                userId,
-                "123",
-                "holder",
-                LocalDate.now().minusDays(1)
-        );
+        CardDTO invalidCard = new CardDTO(null, userId, "123", "holder", LocalDate.now().minusDays(1));
 
         ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, invalidCard, String.class);
 
@@ -101,13 +81,7 @@ class CardControllerIntegrationTest {
     void createCard_WhenInvalidCardNumberFormat_ReturnsBadRequest() {
         Long userId = createTestUser();
 
-        CardDTO invalidCard = new CardDTO(
-                null,
-                userId,
-                "1234abc567890123",
-                "Dmitry Popov",
-                LocalDate.now().plusYears(1)
-        );
+        CardDTO invalidCard = new CardDTO(null, userId, "1234abc567890123", "Dmitry Popov", LocalDate.now().plusYears(1));
 
         ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, invalidCard, String.class);
 
@@ -116,13 +90,7 @@ class CardControllerIntegrationTest {
 
     @Test
     void createCard_WhenUserNotExists_ReturnsNotFound() {
-        CardDTO cardRequest = new CardDTO(
-                null,
-                99999L,
-                "7777777777777777",
-                "Dmitry Popov",
-                LocalDate.now().plusYears(2)
-        );
+        CardDTO cardRequest = new CardDTO(null, 99999L, "7777777777777777", "Dmitry Popov", LocalDate.now().plusYears(2));
 
         ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, cardRequest, String.class);
 
@@ -162,8 +130,7 @@ class CardControllerIntegrationTest {
         CardDTO card2 = createTestCard(userId, "2222222222222222", "User Two");
 
         String idsParam = card1.id() + "," + card2.id();
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                baseUrl + "?ids=" + idsParam + "&page=0&size=10", String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(baseUrl + "?ids=" + idsParam + "&page=0&size=10", String.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
@@ -179,8 +146,7 @@ class CardControllerIntegrationTest {
         createTestCard(userId, "3333333333333333", "User Three");
         createTestCard(userId, "4444444444444444", "User Four");
 
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                baseUrl + "?page=0&size=10", String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(baseUrl + "?page=0&size=10", String.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
@@ -195,20 +161,9 @@ class CardControllerIntegrationTest {
         Long userId = createTestUser();
         CardDTO createdCard = createTestCard(userId, "1111111111111111", "Original Holder");
 
-        CardDTO updateRequest = new CardDTO(
-                createdCard.id(),
-                userId,
-                "7777777777777777",
-                "Updated Holder",
-                LocalDate.now().plusYears(3)
-        );
+        CardDTO updateRequest = new CardDTO(createdCard.id(), userId, "7777777777777777", "Updated Holder", LocalDate.now().plusYears(3));
 
-        ResponseEntity<Void> response = restTemplate.exchange(
-                baseUrl,
-                HttpMethod.PUT,
-                new HttpEntity<>(updateRequest),
-                Void.class
-        );
+        ResponseEntity<Void> response = restTemplate.exchange(baseUrl, HttpMethod.PUT, new HttpEntity<>(updateRequest), Void.class);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
@@ -217,20 +172,9 @@ class CardControllerIntegrationTest {
     void updateCard_WhenCardNotExists_ReturnsNotFound() {
         Long userId = createTestUser();
 
-        CardDTO updateRequest = new CardDTO(
-                99999L,
-                userId,
-                "7777777777777777",
-                "Non-existent Card",
-                LocalDate.now().plusYears(1)
-        );
+        CardDTO updateRequest = new CardDTO(99999L, userId, "7777777777777777", "Non-existent Card", LocalDate.now().plusYears(1));
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                baseUrl,
-                HttpMethod.PUT,
-                new HttpEntity<>(updateRequest),
-                String.class
-        );
+        ResponseEntity<String> response = restTemplate.exchange(baseUrl, HttpMethod.PUT, new HttpEntity<>(updateRequest), String.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -240,20 +184,9 @@ class CardControllerIntegrationTest {
         Long userId = createTestUser();
         CardDTO createdCard = createTestCard(userId, "7777777777777777", "Test Holder");
 
-        CardDTO invalidUpdateRequest = new CardDTO(
-                createdCard.id(),
-                userId,
-                "123",
-                "X",
-                LocalDate.now().minusDays(1)
-        );
+        CardDTO invalidUpdateRequest = new CardDTO(createdCard.id(), userId, "123", "X", LocalDate.now().minusDays(1));
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                baseUrl,
-                HttpMethod.PUT,
-                new HttpEntity<>(invalidUpdateRequest),
-                String.class
-        );
+        ResponseEntity<String> response = restTemplate.exchange(baseUrl, HttpMethod.PUT, new HttpEntity<>(invalidUpdateRequest), String.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -263,42 +196,24 @@ class CardControllerIntegrationTest {
         Long userId = createTestUser();
         CardDTO createdCard = createTestCard(userId, "7777777777777777", "To Delete");
 
-        ResponseEntity<Void> deleteResponse = restTemplate.exchange(
-                baseUrl + "/" + createdCard.id(),
-                HttpMethod.DELETE,
-                null,
-                Void.class
-        );
+        ResponseEntity<Void> deleteResponse = restTemplate.exchange(baseUrl + "/" + createdCard.id(), HttpMethod.DELETE, null, Void.class);
 
         assertEquals(HttpStatus.NO_CONTENT, deleteResponse.getStatusCode());
 
-        ResponseEntity<String> getResponse = restTemplate.getForEntity(
-                baseUrl + "/" + createdCard.id(),
-                String.class
-        );
+        ResponseEntity<String> getResponse = restTemplate.getForEntity(baseUrl + "/" + createdCard.id(), String.class);
         assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode());
     }
 
     @Test
     void deleteCard_WhenCardNotExists_ReturnsNotFound() {
-        ResponseEntity<Void> response = restTemplate.exchange(
-                baseUrl + "/99999",
-                HttpMethod.DELETE,
-                null,
-                Void.class
-        );
+        ResponseEntity<Void> response = restTemplate.exchange(baseUrl + "/99999", HttpMethod.DELETE, null, Void.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     void deleteCard_WhenInvalidIdProvided_ReturnsBadRequest() {
-        ResponseEntity<String> response = restTemplate.exchange(
-                baseUrl + "/0",
-                HttpMethod.DELETE,
-                null,
-                String.class
-        );
+        ResponseEntity<String> response = restTemplate.exchange(baseUrl + "/0", HttpMethod.DELETE, null, String.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -306,14 +221,7 @@ class CardControllerIntegrationTest {
     private Long createTestUser() {
         String userUrl = "/api/v1/users";
 
-        UserDTO userRequest = new UserDTO(
-                null,
-                "testuser12345@example.com",
-                "Test",
-                "User",
-                LocalDate.of(1990, 1, 1),
-                Collections.emptyList()
-        );
+        UserDTO userRequest = new UserDTO(null, "testuser12345@example.com", "Test", "User", LocalDate.of(1990, 1, 1), Collections.emptyList());
 
         ResponseEntity<UserDTO> response = restTemplate.postForEntity(userUrl, userRequest, UserDTO.class);
         if (response.getStatusCode() == HttpStatus.CREATED) {
@@ -323,13 +231,7 @@ class CardControllerIntegrationTest {
     }
 
     private CardDTO createTestCard(Long userId, String cardNumber, String cardHolder) {
-        CardDTO cardRequest = new CardDTO(
-                null,
-                userId,
-                cardNumber,
-                cardHolder,
-                LocalDate.now().plusYears(2)
-        );
+        CardDTO cardRequest = new CardDTO(null, userId, cardNumber, cardHolder, LocalDate.now().plusYears(2));
 
         ResponseEntity<CardDTO> response = restTemplate.postForEntity(baseUrl, cardRequest, CardDTO.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
