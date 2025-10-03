@@ -1,61 +1,120 @@
 package org.innowise.userservice.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.innowise.userservice.model.dto.CreateUserRequest;
-import org.innowise.userservice.model.dto.UpdateUserRequest;
-import org.innowise.userservice.model.dto.UserResponse;
+import org.innowise.userservice.exception.NotFoundException;
+import org.innowise.userservice.model.dto.UserDTO;
+import org.innowise.userservice.model.dto.UserFilterDTO;
 import org.innowise.userservice.service.UserService;
+import org.innowise.userservice.util.ApplicationConstant;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
-@RestController("/api/user-service/users")
+/**
+ * REST Controller for managing user operations.
+ * Provides endpoints for creating, retrieving, updating, and deleting users.
+ *
+ * <p>All endpoints are prefixed with {@code /api/v1/users} and support standard HTTP methods
+ * with appropriate status codes and validation.</p>
+ *
+ * @version 1.0
+ * @see UserService
+ * @see UserDTO
+ */
+@RestController
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/create")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest userRequest) {
-        UserResponse createdUser = userService.createUser(userRequest);
+    /**
+     * Retrieves a paginated list of users with optional filtering.
+     * Supports pagination through Spring Data's Pageable.
+     *
+     * @param filter optional filter criteria for searching users (can be {@code null})
+     * @param pageable pagination configuration including page number, size
+     * @return {@link ResponseEntity} containing a {@link Page} of {@link UserDTO} objects
+     *         with HTTP status 200 (OK)
+     * @apiNote Example: GET /api/v1/users?page=0&size=10
+     */
+    @GetMapping
+    public ResponseEntity<Page<UserDTO>> getUsers(
+            UserFilterDTO filter,
+            @PageableDefault Pageable pageable) {
+        Page<UserDTO> usersPage = userService.getUsers(filter, pageable);
+        return ResponseEntity.ok(usersPage);
+    }
+
+    /**
+     * Retrieves a specific user by their unique identifier.
+     * Validates that the ID is a positive number.
+     *
+     * @param id the unique identifier of the user (must be a positive number)
+     * @return {@link ResponseEntity} containing the {@link UserDTO} with HTTP status 200 (OK)
+     * @throws NotFoundException if no user exists with the given ID
+     * @apiNote Example: GET /api/v1/users/123
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable(ApplicationConstant.ID) @Positive Long id) {
+        UserDTO user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    /**
+     * Creates a new user in the system.
+     * Validates the request body and returns the created user with generated ID.
+     *
+     * @param userRequest the user data for creation (must be valid
+     * @return {@link ResponseEntity} containing the created {@link UserDTO}
+     *         with HTTP status 201 (CREATED)
+     * @apiNote Example: POST /api/v1/users
+     */
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userRequest) {
+        UserDTO createdUser = userService.createUser(userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        UserResponse user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+    /**
+     * Updates an existing user's information.
+     * Validates the request body and performs a full update of the user data.
+     *
+     * @param updateUserRequest the updated user data (must be valid and not {@code null})
+     * @return {@link ResponseEntity} containing the updated user data with HTTP status 200 (OK)
+     * @throws NotFoundException if no user exists with the given ID
+     * @apiNote Example: PUT /api/v1/users
+     */
+    @PutMapping
+    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO updateUserRequest) {
+        UserDTO updatedUser = userService.updateUserById(updateUserRequest);
+        return ResponseEntity.ok(updatedUser);
     }
 
-    @GetMapping("/some-users")
-    public ResponseEntity<List<UserResponse>> getUsersByIds(@RequestParam List<Long> ids) {
-        List<UserResponse> users = userService.getUsersByIds(ids);
-        return ResponseEntity.ok(users);
-    }
-
-    @GetMapping("/email/{email}")
-    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
-        UserResponse user = userService.getUserByEmail(email);
-        return ResponseEntity.ok(user);
-    }
-
-    @PutMapping("/update")
-    public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UpdateUserRequest updateUserRequest) {
-        userService.updateUserById(updateUserRequest);
-        return ResponseEntity.noContent().build();
-    }
-
+    /**
+     * Deletes a user by their unique identifier.
+     * Validates that the ID is at least 1.
+     *
+     * @param id the unique identifier of the user to delete (must be at least 1)
+     * @return {@link ResponseEntity} with no content and HTTP status 204 (NO_CONTENT)
+     * @apiNote Example: DELETE /api/v1/users/123
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable(ApplicationConstant.ID) @Min(1) Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
