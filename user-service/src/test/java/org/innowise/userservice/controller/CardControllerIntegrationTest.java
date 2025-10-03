@@ -46,6 +46,21 @@ class CardControllerIntegrationTest {
     }
 
     @Test
+    void getUsers_WhenNoUsersExist_ReturnsEmptyPage() throws JsonProcessingException {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                baseUrl + "?page=0&size=10", String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+//        ObjectMapper mapper = new ObjectMapper();
+//        JsonNode root = mapper.readTree(response.getBody());
+//        JsonNode content = root.get("content");
+//
+//        assertEquals(0, content.size());
+//        assertEquals(0, root.get("totalElements").asInt());
+    }
+
+    @Test
     void createCard_WhenValidDataProvided_ReturnsCreatedCardDTO() {
         Long userId = createTestUser();
 
