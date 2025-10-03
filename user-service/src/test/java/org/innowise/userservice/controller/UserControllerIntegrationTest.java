@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.innowise.userservice.model.dto.UserDTO;
+import org.innowise.userservice.util.ErrorConstant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,27 @@ class UserControllerIntegrationTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("testuser", response.getBody().name());
+    }
+
+    @Test
+    void createUser_WhenUserAlreadyExists_ReturnsConflict() {
+        UserDTO userRequest = createUserDTO("existinguser", "duplicate@example.com");
+
+        ResponseEntity<UserDTO> firstResponse = restTemplate.postForEntity(baseUrl, userRequest, UserDTO.class);
+        assertEquals(HttpStatus.CREATED, firstResponse.getStatusCode());
+
+        ResponseEntity<String> secondResponse = restTemplate.postForEntity(baseUrl, userRequest, String.class);
+
+        assertEquals(HttpStatus.CONFLICT, secondResponse.getStatusCode());
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode errorResponse = mapper.readTree(secondResponse.getBody());
+            assertEquals(ErrorConstant.CONFLICT_ERROR_CODE, errorResponse.get("errorCode").asText());
+            assertEquals(HttpStatus.CONFLICT.value(), errorResponse.get("status").asInt());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse error response", e);
+        }
     }
 
     @Test
@@ -239,6 +261,18 @@ class UserControllerIntegrationTest {
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void badEndpoint_accessNonExistentEndpoint_ReturnsNotFound() throws JsonProcessingException {
+        ResponseEntity<String> response = restTemplate.getForEntity("/api/v1/non-existent-endpoint", String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode errorResponse = mapper.readTree(response.getBody());
+        assertEquals(ErrorConstant.NOT_FOUND_ERROR_CODE, errorResponse.get("errorCode").asText());
+        assertEquals(HttpStatus.NOT_FOUND.value(), errorResponse.get("status").asInt());
     }
 
     private UserDTO createUserDTO(String name, String email) {
