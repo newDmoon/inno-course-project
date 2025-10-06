@@ -8,7 +8,6 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface CardMapper {
-    @Mapping(target = "id", ignore = true)
     Card toEntity(CardDTO cardDTO);
 
     @Mapping(source = "user.id", target = "userId")

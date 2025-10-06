@@ -18,4 +18,8 @@ public class NotFoundException extends RuntimeException {
     public NotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public NotFoundException(Long id) {
+        super(ErrorConstant.ENTITY_WITH_ID_NOT_FOUND.formatted(id));
+    }
 }
