@@ -1,12 +1,5 @@
-FROM maven:3.9.4-eclipse-temurin-17 AS builder
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY pom.xml .
-RUN mvn -B dependency:go-offline
-COPY src ./src
-
-RUN mvn -B clean package
-FROM eclipse-temurin:17-jre
-WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
+COPY target/auth-service-1.0-SNAPSHOT.jar app.jar
 EXPOSE 8081
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
