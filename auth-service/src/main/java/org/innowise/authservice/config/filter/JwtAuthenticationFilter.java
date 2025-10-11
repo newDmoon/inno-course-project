@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.innowise.authservice.service.CustomUserDetailsService;
+import org.innowise.authservice.service.impl.CustomUserDetailsService;
 import org.innowise.authservice.util.ApplicationConstant;
 import org.innowise.authservice.util.JwtTokenProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

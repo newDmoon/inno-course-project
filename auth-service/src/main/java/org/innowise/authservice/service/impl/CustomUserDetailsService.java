@@ -1,4 +1,4 @@
-package org.innowise.authservice.service;
+package org.innowise.authservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.innowise.authservice.model.entity.Role;
@@ -14,7 +14,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-    private static final String ROLE_PART = "ROLE_";
+    private static final String ROLE_PART = "ROLE_%s";
+
     private final UserRepository userRepository;
 
     @Override

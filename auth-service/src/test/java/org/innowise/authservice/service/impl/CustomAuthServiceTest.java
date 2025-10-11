@@ -10,7 +10,6 @@ import org.innowise.authservice.model.entity.Role;
 import org.innowise.authservice.model.entity.User;
 import org.innowise.authservice.repository.RoleRepository;
 import org.innowise.authservice.repository.UserRepository;
-import org.innowise.authservice.service.CustomUserDetailsService;
 import org.innowise.authservice.util.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,49 +50,49 @@ class CustomAuthServiceTest {
     @InjectMocks
     private CustomAuthService customAuthService;
 
-    private final String TEST_EMAIL = "test@example.com";
-    private final String TEST_PASSWORD = "password123";
-    private final String TEST_ACCESS_TOKEN = "access-token";
-    private final String TEST_REFRESH_TOKEN = "refresh-token";
-    private final String ENCODED_PASSWORD = "encoded-password";
+    private final String testEmail = "test@example.com";
+    private final String testPassword = "password123";
+    private final String testAccessToken = "access-token";
+    private final String testRefreshToken = "refresh-token";
+    private final String encodedPassword = "encoded-password";
 
     @Test
     void login_WithValidCredentials_ShouldReturnAuthResponse() {
-        AuthRequest authRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
         User user = new User();
-        user.setEmail(TEST_EMAIL);
-        user.setPasswordHash(ENCODED_PASSWORD);
+        user.setEmail(testEmail);
+        user.setPasswordHash(encodedPassword);
 
         UserDetails userDetails = mock(UserDetails.class);
 
-        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(TEST_PASSWORD, ENCODED_PASSWORD)).thenReturn(true);
-        when(customUserDetailsService.loadUserByUsername(TEST_EMAIL)).thenReturn(userDetails);
-        when(jwtTokenProvider.generateAccessToken(userDetails)).thenReturn(TEST_ACCESS_TOKEN);
-        when(jwtTokenProvider.generateRefreshToken(userDetails)).thenReturn(TEST_REFRESH_TOKEN);
+        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(testPassword, encodedPassword)).thenReturn(true);
+        when(customUserDetailsService.loadUserByUsername(testEmail)).thenReturn(userDetails);
+        when(jwtTokenProvider.generateAccessToken(userDetails)).thenReturn(testAccessToken);
+        when(jwtTokenProvider.generateRefreshToken(userDetails)).thenReturn(testRefreshToken);
 
         AuthResponse result = customAuthService.login(authRequest);
 
         assertNotNull(result);
-        assertEquals(TEST_ACCESS_TOKEN, result.accessToken());
-        assertEquals(TEST_REFRESH_TOKEN, result.refreshToken());
+        assertEquals(testAccessToken, result.accessToken());
+        assertEquals(testRefreshToken, result.refreshToken());
 
-        verify(userRepository).findByEmail(TEST_EMAIL);
-        verify(passwordEncoder).matches(TEST_PASSWORD, ENCODED_PASSWORD);
-        verify(customUserDetailsService).loadUserByUsername(TEST_EMAIL);
+        verify(userRepository).findByEmail(testEmail);
+        verify(passwordEncoder).matches(testPassword, encodedPassword);
+        verify(customUserDetailsService).loadUserByUsername(testEmail);
         verify(jwtTokenProvider).generateAccessToken(userDetails);
         verify(jwtTokenProvider).generateRefreshToken(userDetails);
     }
 
     @Test
     void login_WithNonExistentUser_ShouldThrowNotFoundException() {
-        AuthRequest authRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
 
-        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> customAuthService.login(authRequest));
 
-        verify(userRepository).findByEmail(TEST_EMAIL);
+        verify(userRepository).findByEmail(testEmail);
         verify(passwordEncoder, never()).matches(anyString(), anyString());
         verify(customUserDetailsService, never()).loadUserByUsername(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
@@ -102,18 +101,18 @@ class CustomAuthServiceTest {
 
     @Test
     void login_WithInvalidPassword_ShouldThrowBadCredentialsException() {
-        AuthRequest authRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
         User user = new User();
-        user.setEmail(TEST_EMAIL);
-        user.setPasswordHash(ENCODED_PASSWORD);
+        user.setEmail(testEmail);
+        user.setPasswordHash(encodedPassword);
 
-        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(TEST_PASSWORD, ENCODED_PASSWORD)).thenReturn(false);
+        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(testPassword, encodedPassword)).thenReturn(false);
 
         assertThrows(BadCredentialsException.class, () -> customAuthService.login(authRequest));
 
-        verify(userRepository).findByEmail(TEST_EMAIL);
-        verify(passwordEncoder).matches(TEST_PASSWORD, ENCODED_PASSWORD);
+        verify(userRepository).findByEmail(testEmail);
+        verify(passwordEncoder).matches(testPassword, encodedPassword);
         verify(customUserDetailsService, never()).loadUserByUsername(anyString());
         verify(jwtTokenProvider, never()).generateAccessToken(any());
         verify(jwtTokenProvider, never()).generateRefreshToken(any());
@@ -121,44 +120,44 @@ class CustomAuthServiceTest {
 
     @Test
     void register_WithNewUser_ShouldReturnAuthResponse() {
-        AuthRequest authRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
         Role userRole = new Role();
         userRole.setName(Permission.ROLE_USER);
 
         UserDetails userDetails = mock(UserDetails.class);
 
-        when(userRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
+        when(userRepository.existsByEmail(testEmail)).thenReturn(false);
         when(roleRepository.findByName(Permission.ROLE_USER)).thenReturn(Optional.of(userRole));
-        when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        when(passwordEncoder.encode(testPassword)).thenReturn(encodedPassword);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(customUserDetailsService.loadUserByUsername(TEST_EMAIL)).thenReturn(userDetails);
-        when(jwtTokenProvider.generateAccessToken(userDetails)).thenReturn(TEST_ACCESS_TOKEN);
-        when(jwtTokenProvider.generateRefreshToken(userDetails)).thenReturn(TEST_REFRESH_TOKEN);
+        when(customUserDetailsService.loadUserByUsername(testEmail)).thenReturn(userDetails);
+        when(jwtTokenProvider.generateAccessToken(userDetails)).thenReturn(testAccessToken);
+        when(jwtTokenProvider.generateRefreshToken(userDetails)).thenReturn(testRefreshToken);
 
         AuthResponse result = customAuthService.register(authRequest);
 
         assertNotNull(result);
-        assertEquals(TEST_ACCESS_TOKEN, result.accessToken());
-        assertEquals(TEST_REFRESH_TOKEN, result.refreshToken());
+        assertEquals(testAccessToken, result.accessToken());
+        assertEquals(testRefreshToken, result.refreshToken());
 
-        verify(userRepository).existsByEmail(TEST_EMAIL);
+        verify(userRepository).existsByEmail(testEmail);
         verify(roleRepository).findByName(Permission.ROLE_USER);
-        verify(passwordEncoder).encode(TEST_PASSWORD);
+        verify(passwordEncoder).encode(testPassword);
         verify(userRepository).save(any(User.class));
-        verify(customUserDetailsService).loadUserByUsername(TEST_EMAIL);
+        verify(customUserDetailsService).loadUserByUsername(testEmail);
         verify(jwtTokenProvider).generateAccessToken(userDetails);
         verify(jwtTokenProvider).generateRefreshToken(userDetails);
     }
 
     @Test
     void register_WithExistingUser_ShouldThrowAlreadyExistsException() {
-        AuthRequest authRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
 
-        when(userRepository.existsByEmail(TEST_EMAIL)).thenReturn(true);
+        when(userRepository.existsByEmail(testEmail)).thenReturn(true);
 
         assertThrows(AlreadyExistsException.class, () -> customAuthService.register(authRequest));
 
-        verify(userRepository).existsByEmail(TEST_EMAIL);
+        verify(userRepository).existsByEmail(testEmail);
         verify(roleRepository, never()).findByName(any());
         verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository, never()).save(any(User.class));
@@ -169,14 +168,14 @@ class CustomAuthServiceTest {
 
     @Test
     void register_WhenRoleNotFound_ShouldThrowNotFoundException() {
-        AuthRequest authRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
 
-        when(userRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
+        when(userRepository.existsByEmail(testEmail)).thenReturn(false);
         when(roleRepository.findByName(Permission.ROLE_USER)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> customAuthService.register(authRequest));
 
-        verify(userRepository).existsByEmail(TEST_EMAIL);
+        verify(userRepository).existsByEmail(testEmail);
         verify(roleRepository).findByName(Permission.ROLE_USER);
         verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository, never()).save(any(User.class));
@@ -187,13 +186,13 @@ class CustomAuthServiceTest {
 
     @Test
     void refresh_WithValidRefreshToken_ShouldReturnNewAuthResponse() {
-        TokenRequest tokenRequest = new TokenRequest(TEST_REFRESH_TOKEN);
+        TokenRequest tokenRequest = new TokenRequest(testRefreshToken);
         UserDetails userDetails = mock(UserDetails.class);
 
-        when(jwtTokenProvider.validateToken(TEST_REFRESH_TOKEN)).thenReturn(true);
-        when(jwtTokenProvider.isRefreshToken(TEST_REFRESH_TOKEN)).thenReturn(true);
-        when(jwtTokenProvider.extractUsername(TEST_REFRESH_TOKEN)).thenReturn(TEST_EMAIL);
-        when(customUserDetailsService.loadUserByUsername(TEST_EMAIL)).thenReturn(userDetails);
+        when(jwtTokenProvider.validateToken(testRefreshToken)).thenReturn(true);
+        when(jwtTokenProvider.isRefreshToken(testRefreshToken)).thenReturn(true);
+        when(jwtTokenProvider.extractUsername(testRefreshToken)).thenReturn(testEmail);
+        when(customUserDetailsService.loadUserByUsername(testEmail)).thenReturn(userDetails);
         when(jwtTokenProvider.generateAccessToken(userDetails)).thenReturn("new-access-token");
         when(jwtTokenProvider.generateRefreshToken(userDetails)).thenReturn("new-refresh-token");
 
@@ -203,10 +202,10 @@ class CustomAuthServiceTest {
         assertEquals("new-access-token", result.accessToken());
         assertEquals("new-refresh-token", result.refreshToken());
 
-        verify(jwtTokenProvider).validateToken(TEST_REFRESH_TOKEN);
-        verify(jwtTokenProvider).isRefreshToken(TEST_REFRESH_TOKEN);
-        verify(jwtTokenProvider).extractUsername(TEST_REFRESH_TOKEN);
-        verify(customUserDetailsService).loadUserByUsername(TEST_EMAIL);
+        verify(jwtTokenProvider).validateToken(testRefreshToken);
+        verify(jwtTokenProvider).isRefreshToken(testRefreshToken);
+        verify(jwtTokenProvider).extractUsername(testRefreshToken);
+        verify(customUserDetailsService).loadUserByUsername(testEmail);
         verify(jwtTokenProvider).generateAccessToken(userDetails);
         verify(jwtTokenProvider).generateRefreshToken(userDetails);
     }

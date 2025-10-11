@@ -12,7 +12,6 @@ import org.innowise.authservice.model.entity.User;
 import org.innowise.authservice.repository.RoleRepository;
 import org.innowise.authservice.repository.UserRepository;
 import org.innowise.authservice.service.AuthService;
-import org.innowise.authservice.service.CustomUserDetailsService;
 import org.innowise.authservice.util.JwtTokenProvider;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;

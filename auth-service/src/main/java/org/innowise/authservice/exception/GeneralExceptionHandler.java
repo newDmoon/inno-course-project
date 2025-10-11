@@ -1,5 +1,6 @@
 package org.innowise.authservice.exception;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.innowise.authservice.util.ApplicationConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -68,7 +70,7 @@ public class GeneralExceptionHandler {
         log.info("Entity already exists: {}", ex.getMessage());
 
         ApiError apiError = ApiError.of(
-                ex.getMessage(),
+                ApplicationConstant.ENTITY_ALREADY_EXISTS,
                 HttpStatus.CONFLICT,
                 request.getRequestURI(),
                 ApplicationConstant.CONFLICT_ERROR_CODE
@@ -94,8 +96,8 @@ public class GeneralExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex,
-                                                  HttpServletRequest request) {
-        log.error("Access denied for request {}", request.getRequestURI(), ex);
+                                                              HttpServletRequest request) {
+        log.warn("Access denied for request {}", request.getRequestURI(), ex);
 
         ApiError apiError = ApiError.of(
                 ApplicationConstant.ACCESS_DENIED,
@@ -104,7 +106,7 @@ public class GeneralExceptionHandler {
                 ApplicationConstant.ACCESS_DENIED_ERROR_CODE
         );
 
-        return ResponseEntity.internalServerError().body(apiError);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -135,5 +137,36 @@ public class GeneralExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(AuthenticationException ex,
+                                                                     HttpServletRequest request) {
+        log.warn("Authentication failed for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+
+        ApiError apiError = ApiError.of(
+                ApplicationConstant.AUTHENTICATION_FAILED,
+                HttpStatus.UNAUTHORIZED,
+                request.getRequestURI(),
+                ApplicationConstant.AUTHENTICATION_FAILED_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Object> handleGenericJwtException(JwtException ex,
+                                                            HttpServletRequest request) {
+        log.warn("JWT processing error for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ApplicationConstant.JWT_INVALID,
+                HttpStatus.UNAUTHORIZED,
+                request.getRequestURI(),
+                ApplicationConstant.JWT_FAILED_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
     }
 }
