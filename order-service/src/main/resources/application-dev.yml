@@ -1,6 +1,10 @@
 server:
   port: ${SERVER_PORT:8082}
 
+user:
+  service:
+    url: http://localhost:8081
+
 spring:
   config:
     import: "optional:file:.env[.properties]"

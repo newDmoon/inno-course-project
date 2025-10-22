@@ -2,11 +2,13 @@ package org.innowise.orderservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.innowise.orderservice.client.UserClient;
 import org.innowise.orderservice.exception.NotFoundException;
 import org.innowise.orderservice.mapper.OrderMapper;
 import org.innowise.orderservice.model.OrderStatus;
 import org.innowise.orderservice.model.dto.OrderDTO;
 import org.innowise.orderservice.model.dto.OrderFilterDTO;
+import org.innowise.orderservice.model.dto.UserDTO;
 import org.innowise.orderservice.model.entity.Order;
 import org.innowise.orderservice.repository.OrderRepository;
 import org.innowise.orderservice.service.OrderService;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 public class CustomOrderService implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final UserClient userClient;
 
     @Override
     @Transactional
@@ -32,14 +35,22 @@ public class CustomOrderService implements OrderService {
         order.setStatus(OrderStatus.PENDING);
 
         Order savedOrder = orderRepository.save(order);
-        return orderMapper.toDTO(savedOrder);
+        OrderDTO response = orderMapper.toDTO(savedOrder);
+
+        UserDTO userDTO = getUserInfo(response.userId());
+        return enrichOrderWithUser(response, userDTO);
     }
 
     @Override
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(id));
-        return orderMapper.toDTO(order);
+
+
+        OrderDTO orderDTO = orderMapper.toDTO(order);
+        UserDTO userDTO = getUserInfo(orderDTO.userId());
+
+        return enrichOrderWithUser(orderDTO, userDTO);
     }
 
     @Override
@@ -54,7 +65,11 @@ public class CustomOrderService implements OrderService {
             ordersPage = orderRepository.findAll(pageable);
         }
 
-        return ordersPage.map(orderMapper::toDTO);
+        return ordersPage.map(order -> {
+            OrderDTO orderDTO = orderMapper.toDTO(order);
+            UserDTO userDTO = getUserInfo(orderDTO.userId());
+            return enrichOrderWithUser(orderDTO, userDTO);
+        });
     }
 
     @Override
@@ -65,9 +80,12 @@ public class CustomOrderService implements OrderService {
         
         existingOrder.setUserId(orderDTO.userId());
         existingOrder.setStatus(orderDTO.status());
-        
+
         Order savedOrder = orderRepository.save(existingOrder);
-        return orderMapper.toDTO(savedOrder);
+        OrderDTO response = orderMapper.toDTO(savedOrder);
+
+        UserDTO userDTO = getUserInfo(response.userId());
+        return enrichOrderWithUser(response, userDTO);
     }
 
     @Override
@@ -79,5 +97,24 @@ public class CustomOrderService implements OrderService {
         
         orderRepository.deleteById(id);
         return true;
+    }
+
+    private UserDTO getUserInfo(Long id) {
+        try {
+            return userClient.getUserById(id);
+        } catch (Exception e) {
+            log.error("Failed to fetch user info for email={}: {}", id, e.getMessage());
+            return null;
+        }
+    }
+
+    private OrderDTO enrichOrderWithUser(OrderDTO orderDTO, UserDTO userDTO) {
+        return OrderDTO.builder()
+                .id(orderDTO.id())
+                .userId(orderDTO.userId())
+                .status(orderDTO.status())
+                .creationDate(orderDTO.creationDate())
+                .userDTO(userDTO)
+                .build();
     }
 }

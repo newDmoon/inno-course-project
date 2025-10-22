@@ -50,12 +50,12 @@ class CustomOrderServiceTest {
         userId = 100L;
         creationDate = LocalDateTime.now();
         orderEntity = createOrderEntity();
-        orderDTO = new OrderDTO(orderId, userId, OrderStatus.PENDING, creationDate);
+        orderDTO = new OrderDTO(orderId, userId, OrderStatus.PENDING, null, creationDate);
     }
 
     @Test
     void createOrder_ShouldCreateOrderSuccessfully() {
-        OrderDTO inputDTO = new OrderDTO(null, userId, OrderStatus.PENDING, null);
+        OrderDTO inputDTO = new OrderDTO(null, userId, OrderStatus.PENDING, null, null);
 
         when(orderMapper.toEntity(inputDTO)).thenReturn(orderEntity);
         when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
@@ -140,10 +140,10 @@ class CustomOrderServiceTest {
 
     @Test
     void updateOrderById_WhenOrderExists_ShouldUpdateOrder() {
-        OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, creationDate);
+        OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, creationDate);
         Order updatedOrder = createOrderEntity();
         updatedOrder.setStatus(OrderStatus.CONFIRMED);
-        OrderDTO expectedDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, creationDate);
+        OrderDTO expectedDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, creationDate);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(orderEntity));
         when(orderRepository.save(orderEntity)).thenReturn(updatedOrder);
@@ -159,7 +159,7 @@ class CustomOrderServiceTest {
 
     @Test
     void updateOrderById_WhenOrderNotExists_ShouldThrowNotFoundException() {
-        OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, creationDate);
+        OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, creationDate);
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> orderService.updateOrderById(orderId, updateDTO));
