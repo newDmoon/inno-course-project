@@ -6,6 +6,5 @@ import java.util.List;
 
 public record OrderFilterDTO(
         List<Long> ids,
-        List<OrderStatus> statuses
-) {
+        List<OrderStatus> statuses) {
 }

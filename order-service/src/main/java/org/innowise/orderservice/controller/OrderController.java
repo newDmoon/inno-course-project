@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.innowise.orderservice.exception.NotFoundException;
 import org.innowise.orderservice.model.dto.OrderDTO;
 import org.innowise.orderservice.model.dto.OrderFilterDTO;
+import org.innowise.orderservice.util.ApplicationConstant;
 import org.springframework.data.domain.Page;
 import org.innowise.orderservice.service.OrderService;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +47,7 @@ public class OrderController {
      * @throws NotFoundException if order with specified ID is not found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable(ApplicationConstant.ID) Long id) {
         OrderDTO order = orderService.getOrderById(id);
         return ResponseEntity.ok(order);
     }
@@ -76,7 +77,8 @@ public class OrderController {
      * @throws NotFoundException if order with specified ID is not found
      */
     @PutMapping("/{id}")
-    public ResponseEntity<OrderDTO> updateOrderById(@PathVariable Long id, @Valid @RequestBody OrderDTO orderDTO) {
+    public ResponseEntity<OrderDTO> updateOrderById(@PathVariable(ApplicationConstant.ID) Long id,
+                                                    @Valid @RequestBody OrderDTO orderDTO) {
         OrderDTO updatedOrder = orderService.updateOrderById(id, orderDTO);
         return ResponseEntity.ok(updatedOrder);
     }
@@ -89,7 +91,7 @@ public class OrderController {
      * @throws NotFoundException if order with specified ID is not found
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteOrderById(@PathVariable(ApplicationConstant.ID) Long id) {
         orderService.deleteOrderById(id);
         return ResponseEntity.noContent().build();
     }
