@@ -1,4 +1,4 @@
-id,name,surname,birth_date,email
-1,Dmitry,Vishnevsky,2001-09-25,dmitry.wish@example.com
-2,Nikita,Filimonov,1985-09-21,nikita.fil@example.com
-3,Petr,Voskresniy,1992-12-02,petr.vosk@example.com
+name,surname,birth_date,email
+Dmitry,Vishnevsky,2001-09-25,dmitry.wish@example.com
+Nikita,Filimonov,1985-09-21,nikita.fil@example.com
+Petr,Voskresniy,1992-12-02,petr.vosk@example.com
