@@ -1,22 +1,21 @@
 package org.innowise.userservice.exception;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.innowise.userservice.exception.EmptyResourceException;
-import org.innowise.userservice.exception.NotFoundException;
-import org.innowise.userservice.exception.AlreadyExistsException;
 import org.innowise.userservice.model.dto.ApiError;
 import org.innowise.userservice.model.dto.ValidationError;
 import org.innowise.userservice.util.ErrorConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import javax.xml.bind.ValidationException;
 import java.util.List;
 
 @RestControllerAdvice
@@ -26,7 +25,7 @@ public class GeneralExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException ex,
-                                                        HttpServletRequest request) {
+                                                               HttpServletRequest request) {
         log.error("Validation error occurred: {}", ex.getMessage());
 
         List<ValidationError> validationErrors = ex.getBindingResult()
@@ -112,7 +111,7 @@ public class GeneralExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex,
-                                                                HttpServletRequest request) {
+                                                                 HttpServletRequest request) {
         log.info("No mapping found for {} {}", ex.getHttpMethod(), ex.getResourcePath());
 
         ApiError apiError = ApiError.of(
@@ -127,7 +126,7 @@ public class GeneralExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex,
-                                                                 HttpServletRequest request) {
+                                                                     HttpServletRequest request) {
         log.error("Validation error occurred: {}", ex.getMessage());
 
         ApiError apiError = ApiError.of(
@@ -138,5 +137,50 @@ public class GeneralExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex,
+                                                              HttpServletRequest request) {
+        log.warn("Access denied for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ErrorConstant.ACCESS_DENIED,
+                HttpStatus.FORBIDDEN,
+                request.getRequestURI(),
+                ErrorConstant.ACCESS_DENIED_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<Object> handleAuthorizationDeniedException(AuthorizationDeniedException ex,
+                                                                     HttpServletRequest request) {
+        log.warn("Authorization denied for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ErrorConstant.ACCESS_DENIED,
+                HttpStatus.FORBIDDEN,
+                request.getRequestURI(),
+                ErrorConstant.ACCESS_DENIED_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Object> handleAuthorizationDeniedException(JwtException ex,
+                                                                     HttpServletRequest request) {
+        log.warn("JWT validation failed for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ErrorConstant.JWT_VALIDATION_FAILED,
+                HttpStatus.UNAUTHORIZED,
+                request.getRequestURI(),
+                ErrorConstant.JWT_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
     }
 }

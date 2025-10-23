@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +54,7 @@ public class UserController {
      * @apiNote Example: GET /api/v1/users?page=0&size=10
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Page<UserDTO>> getUsers(
             UserFilterDTO filter,
             @PageableDefault Pageable pageable) {
@@ -70,6 +72,7 @@ public class UserController {
      * @apiNote Example: GET /api/v1/users/123
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<UserDTO> getUserById(@PathVariable(ApplicationConstant.ID) @Positive Long id) {
         UserDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user);
@@ -85,6 +88,7 @@ public class UserController {
      * @apiNote Example: POST /api/v1/users
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userRequest) {
         UserDTO createdUser = userService.createUser(userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
@@ -100,6 +104,7 @@ public class UserController {
      * @apiNote Example: PUT /api/v1/users
      */
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO updateUserRequest) {
         UserDTO updatedUser = userService.updateUserById(updateUserRequest);
         return ResponseEntity.ok(updatedUser);
@@ -114,6 +119,7 @@ public class UserController {
      * @apiNote Example: DELETE /api/v1/users/123
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable(ApplicationConstant.ID) @Min(1) Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();

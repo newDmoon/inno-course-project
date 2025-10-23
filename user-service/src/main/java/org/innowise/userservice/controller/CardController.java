@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,6 +57,7 @@ public class CardController {
      *          GET /api/v1/cards?page=0&size=10
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Page<CardDTO>> getCards(
             @RequestParam(value = ApplicationConstant.IDS, required = false) List<Long> ids,
             @PageableDefault(size = 10) Pageable pageable) {
@@ -73,6 +75,7 @@ public class CardController {
      * @apiNote Example: GET /api/v1/cards/123
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<CardDTO> getCardById(@PathVariable(ApplicationConstant.ID) @Positive Long id) {
         CardDTO card = cardService.getCardById(id);
         return ResponseEntity.ok(card);
@@ -89,6 +92,7 @@ public class CardController {
      * @apiNote Example: POST /api/v1/cards
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CardDTO> createCard(@Valid @RequestBody CardDTO cardRequest) {
         CardDTO createdCard = cardService.createCard(cardRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCard);
@@ -104,6 +108,7 @@ public class CardController {
      * @apiNote Example: PUT /api/v1/cards
      */
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CardDTO> updateCard(@Valid @RequestBody CardDTO updateCardRequest) {
         cardService.updateCardById(updateCardRequest);
         return ResponseEntity.noContent().build();
@@ -118,6 +123,7 @@ public class CardController {
      * @apiNote Example: DELETE /api/v1/cards/123
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCard(@PathVariable(ApplicationConstant.ID) @Positive Long id) {
         cardService.deleteCardById(id);
         return ResponseEntity.noContent().build();
