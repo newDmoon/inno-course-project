@@ -14,8 +14,6 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-    private static final String ROLE_PART = "ROLE_%s";
-
     private final UserRepository userRepository;
 
     @Override
@@ -32,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private String[] getAuthorities(Set<Role> roles) {
         return roles.stream()
-                .map(role -> ROLE_PART.formatted(role.getName().name()))
+                .map(role -> role.getName().name())
                 .toArray(String[]::new);
     }
 }

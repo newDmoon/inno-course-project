@@ -18,6 +18,6 @@ spring:
 
 app:
   jwt:
-    secret: "mySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKeymySecretKey"
+    secret: "mySecretKeymySecretKeymySecretKeymySecretKey1234567890123456"
     access-token-expiration: 900000
     refresh-token-expiration: 864000000
