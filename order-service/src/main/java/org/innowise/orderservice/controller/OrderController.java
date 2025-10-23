@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -34,6 +35,7 @@ public class OrderController {
      * @return ResponseEntity containing created OrderDTO with HTTP 201 status
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<OrderDTO> createOrder(@Valid @RequestBody OrderDTO orderDTO) {
         OrderDTO createdOrder = orderService.createOrder(orderDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
@@ -47,6 +49,7 @@ public class OrderController {
      * @throws NotFoundException if order with specified ID is not found
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable(ApplicationConstant.ID) Long id) {
         OrderDTO order = orderService.getOrderById(id);
         return ResponseEntity.ok(order);
@@ -61,6 +64,7 @@ public class OrderController {
      * @return ResponseEntity containing Page of OrderDTO with HTTP 200 status
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Page<OrderDTO>> getOrders(
             OrderFilterDTO filter,
             @PageableDefault Pageable pageable) {
@@ -77,6 +81,7 @@ public class OrderController {
      * @throws NotFoundException if order with specified ID is not found
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderDTO> updateOrderById(@PathVariable(ApplicationConstant.ID) Long id,
                                                     @Valid @RequestBody OrderDTO orderDTO) {
         OrderDTO updatedOrder = orderService.updateOrderById(id, orderDTO);
@@ -91,6 +96,7 @@ public class OrderController {
      * @throws NotFoundException if order with specified ID is not found
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteOrderById(@PathVariable(ApplicationConstant.ID) Long id) {
         orderService.deleteOrderById(id);
         return ResponseEntity.noContent().build();

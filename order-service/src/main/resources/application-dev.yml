@@ -24,3 +24,7 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/changelog-master.yml
     enabled: true
+
+app:
+  jwt:
+    secret: "mySecretKeymySecretKeymySecretKeymySecretKey1234567890123456"

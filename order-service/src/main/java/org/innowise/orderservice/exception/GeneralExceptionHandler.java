@@ -1,5 +1,6 @@
 package org.innowise.orderservice.exception;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,8 @@ import org.innowise.orderservice.model.dto.ValidationError;
 import org.innowise.orderservice.util.ApplicationConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -104,5 +107,50 @@ public class GeneralExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex,
+                                                              HttpServletRequest request) {
+        log.warn("Access denied for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ApplicationConstant.ACCESS_DENIED,
+                HttpStatus.FORBIDDEN,
+                request.getRequestURI(),
+                ApplicationConstant.ACCESS_DENIED_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<Object> handleAuthorizationDeniedException(AuthorizationDeniedException ex,
+                                                                     HttpServletRequest request) {
+        log.warn("Authorization denied for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ApplicationConstant.ACCESS_DENIED,
+                HttpStatus.FORBIDDEN,
+                request.getRequestURI(),
+                ApplicationConstant.ACCESS_DENIED_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Object> handleAuthorizationDeniedException(JwtException ex,
+                                                                     HttpServletRequest request) {
+        log.warn("JWT validation failed for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ApplicationConstant.JWT_VALIDATION_FAILED,
+                HttpStatus.UNAUTHORIZED,
+                request.getRequestURI(),
+                ApplicationConstant.JWT_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
     }
 }
