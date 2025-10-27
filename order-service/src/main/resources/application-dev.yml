@@ -1,10 +1,6 @@
 server:
   port: ${SERVER_PORT:8082}
 
-user:
-  service:
-    url: http://localhost:8080
-
 spring:
   config:
     import: "optional:file:.env[.properties]"
@@ -24,7 +20,3 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/changelog-master.yml
     enabled: true
-
-app:
-  jwt:
-    secret: "mySecretKeymySecretKeymySecretKeymySecretKey1234567890123456"
