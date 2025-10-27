@@ -75,7 +75,7 @@ jobs:
           cd order-service
           mvn sonar:sonar \
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-            -Dsonar.projectKey=newDmoon_inno-course-project-order-service \
+            -Dsonar.projectKey=newDmoon_inno-course-project \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
