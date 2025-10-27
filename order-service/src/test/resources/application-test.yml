@@ -1,0 +1,34 @@
+server:
+  port: 8080
+
+user:
+  service:
+    url: http://localhost:10001
+
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16-alpine:///order_service_test
+    username: test
+    password: test
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  liquibase:
+    enabled: false
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      user-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+
+app:
+  jwt:
+    secret: test-secret-key

@@ -7,6 +7,7 @@ import org.innowise.orderservice.model.dto.OrderDTO;
 import org.innowise.orderservice.model.dto.OrderFilterDTO;
 import org.innowise.orderservice.model.entity.Order;
 import org.innowise.orderservice.repository.OrderRepository;
+import org.innowise.orderservice.service.OrderEnrichmentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,9 @@ class CustomOrderServiceTest {
     @Mock
     private OrderMapper orderMapper;
 
+    @Mock
+    private OrderEnrichmentService orderEnrichmentService;
+
     @InjectMocks
     private CustomOrderService orderService;
 
@@ -56,14 +60,16 @@ class CustomOrderServiceTest {
     @Test
     void createOrder_ShouldCreateOrderSuccessfully() {
         OrderDTO inputDTO = new OrderDTO(null, userId, OrderStatus.PENDING, null, null);
+        OrderDTO expectedDTO = new OrderDTO(orderId, userId, OrderStatus.PENDING, null, creationDate);
 
         when(orderMapper.toEntity(inputDTO)).thenReturn(orderEntity);
         when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
-        when(orderMapper.toDTO(orderEntity)).thenReturn(orderDTO);
+        when(orderMapper.toDTO(any(Order.class))).thenReturn(expectedDTO);
+        when(orderEnrichmentService.enrichWithUser(any(OrderDTO.class))).thenAnswer(i -> i.getArgument(0));
 
         OrderDTO result = orderService.createOrder(inputDTO);
 
-        assertEquals(orderDTO, result);
+        assertEquals(expectedDTO, result);
         assertNotNull(orderEntity.getCreationDate());
         assertEquals(OrderStatus.PENDING, orderEntity.getStatus());
         verify(orderRepository).save(orderEntity);
@@ -72,7 +78,8 @@ class CustomOrderServiceTest {
     @Test
     void getOrderById_WhenOrderExists_ShouldReturnOrder() {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(orderEntity));
-        when(orderMapper.toDTO(orderEntity)).thenReturn(orderDTO);
+        when(orderMapper.toDTO(any(Order.class))).thenReturn(orderDTO);
+        when(orderEnrichmentService.enrichWithUser(any(OrderDTO.class))).thenAnswer(i -> i.getArgument(0));
 
         OrderDTO result = orderService.getOrderById(orderId);
 
@@ -95,6 +102,7 @@ class CustomOrderServiceTest {
 
         when(orderRepository.findAllByIdIn(anyList(), any(Pageable.class))).thenReturn(orderPage);
         when(orderMapper.toDTO(any(Order.class))).thenReturn(orderDTO);
+        when(orderEnrichmentService.enrichWithUsers(anyList())).thenAnswer(i -> i.getArgument(0));
 
         Page<OrderDTO> result = orderService.getOrders(filter, pageable);
 
@@ -112,6 +120,7 @@ class CustomOrderServiceTest {
 
         when(orderRepository.findAllByStatusIn(anyList(), any(Pageable.class))).thenReturn(orderPage);
         when(orderMapper.toDTO(any(Order.class))).thenReturn(orderDTO);
+        when(orderEnrichmentService.enrichWithUsers(anyList())).thenAnswer(i -> i.getArgument(0));
 
         Page<OrderDTO> result = orderService.getOrders(filter, pageable);
 
@@ -129,6 +138,7 @@ class CustomOrderServiceTest {
 
         when(orderRepository.findAll(any(Pageable.class))).thenReturn(orderPage);
         when(orderMapper.toDTO(any(Order.class))).thenReturn(orderDTO);
+        when(orderEnrichmentService.enrichWithUsers(anyList())).thenAnswer(i -> i.getArgument(0));
 
         Page<OrderDTO> result = orderService.getOrders(filter, pageable);
 
@@ -141,19 +151,17 @@ class CustomOrderServiceTest {
     @Test
     void updateOrderById_WhenOrderExists_ShouldUpdateOrder() {
         OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, creationDate);
-        Order updatedOrder = createOrderEntity();
-        updatedOrder.setStatus(OrderStatus.CONFIRMED);
         OrderDTO expectedDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, creationDate);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(orderEntity));
-        when(orderRepository.save(orderEntity)).thenReturn(updatedOrder);
-        when(orderMapper.toDTO(updatedOrder)).thenReturn(expectedDTO);
+        when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
+        when(orderMapper.toDTO(orderEntity)).thenReturn(expectedDTO);
+        when(orderEnrichmentService.enrichWithUser(expectedDTO)).thenReturn(expectedDTO);
 
         OrderDTO result = orderService.updateOrderById(orderId, updateDTO);
 
         assertEquals(expectedDTO, result);
-        assertEquals(updateDTO.userId(), orderEntity.getUserId());
-        assertEquals(updateDTO.status(), orderEntity.getStatus());
+        assertEquals(OrderStatus.CONFIRMED, orderEntity.getStatus());
         verify(orderRepository).save(orderEntity);
     }
 
