@@ -5,6 +5,14 @@ on:
     branches:
       - main
       - ORDR-0
+    paths:
+      - 'order-service/**'
+      - '.github/workflows/ci-order-service.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'order-service/**'
 
 jobs:
   build-and-test:
@@ -23,10 +31,14 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn clean install -DskipTests
+        run: |
+          cd order-service
+          mvn clean compile -DskipTests
 
       - name: Run tests
-        run: mvn test
+        run: |
+          cd order-service
+          mvn test
 
   code-analysis:
     name: Code Analysis (SonarQube)
@@ -53,15 +65,18 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Run tests with coverage
-        run: mvn clean test verify
-
-      - name: Build and run SonarQube analysis
+      - name: Run tests with coverage for order-service
         run: |
+          cd order-service
+          mvn clean test jacoco:report
+
+      - name: Build and run SonarQube analysis for order-service
+        run: |
+          cd order-service
           mvn sonar:sonar \
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-            -Dsonar.projectKey=newDmoon_inno-course-project \
-            -Dsonar.coverage.jacoco.xmlReportPaths=order-service/target/site/jacoco/jacoco.xml
+            -Dsonar.projectKey=newDmoon_inno-course-project-order-service \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
