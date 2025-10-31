@@ -33,7 +33,8 @@ public class ApplicationConfiguration {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/swagger/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
