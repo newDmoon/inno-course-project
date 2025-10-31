@@ -1,6 +1,10 @@
 server:
   port: 8081
 
+services:
+  user-service:
+    url: http://localhost:8081
+
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
