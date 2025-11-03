@@ -2,6 +2,7 @@ package org.innowise.authservice.service;
 
 import org.innowise.authservice.model.dto.AuthRequest;
 import org.innowise.authservice.model.dto.AuthResponse;
+import org.innowise.authservice.model.dto.RegistrationRequest;
 import org.innowise.authservice.model.dto.TokenRequest;
 
 /**
@@ -39,8 +40,8 @@ public interface AuthService {
     /**
      * Registers a new user with the provided credentials and returns authentication tokens.
      *
-     * @param authRequest the authentication request containing user registration details
+     * @param registrationRequest the authentication request containing user registration details
      * @return AuthResponse containing access token, refresh token
      */
-    AuthResponse register(AuthRequest authRequest);
+    AuthResponse register(RegistrationRequest registrationRequest);
 }
