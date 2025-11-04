@@ -11,6 +11,7 @@ import org.innowise.authservice.model.dto.TokenRequest;
 import org.innowise.authservice.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +65,7 @@ public class AuthController {
      * @throws ConstraintViolationException if request validation fails
      */
     @PostMapping("/refresh")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody TokenRequest tokenRequest) {
         AuthResponse response = authService.refresh(tokenRequest);
         return ResponseEntity.ok(response);
@@ -78,6 +80,7 @@ public class AuthController {
      * @throws ConstraintViolationException if request validation fails
      */
     @PostMapping("/register")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
         AuthResponse authResponse = authService.register(registrationRequest);
         return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
