@@ -5,6 +5,7 @@ import org.innowise.authservice.exception.NotFoundException;
 import org.innowise.authservice.model.Permission;
 import org.innowise.authservice.model.dto.AuthRequest;
 import org.innowise.authservice.model.dto.AuthResponse;
+import org.innowise.authservice.model.dto.RegistrationRequest;
 import org.innowise.authservice.model.dto.TokenRequest;
 import org.innowise.authservice.model.entity.Role;
 import org.innowise.authservice.model.entity.User;
@@ -52,6 +53,8 @@ class CustomAuthServiceTest {
 
     private final String testEmail = "test@example.com";
     private final String testPassword = "password123";
+    private final String testName = "TestName";
+    private final String testSurname = "TestSurname";
     private final String testAccessToken = "access-token";
     private final String testRefreshToken = "refresh-token";
     private final String encodedPassword = "encoded-password";
@@ -120,7 +123,10 @@ class CustomAuthServiceTest {
 
     @Test
     void register_WithNewUser_ShouldReturnAuthResponse() {
-        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
+        RegistrationRequest registrationRequest = new RegistrationRequest(
+                testEmail, testPassword, testName,
+                testSurname,
+                null);
         Role userRole = new Role();
         userRole.setName(Permission.ROLE_USER);
 
@@ -134,7 +140,7 @@ class CustomAuthServiceTest {
         when(jwtTokenProvider.generateAccessToken(userDetails)).thenReturn(testAccessToken);
         when(jwtTokenProvider.generateRefreshToken(userDetails)).thenReturn(testRefreshToken);
 
-        AuthResponse result = customAuthService.register(authRequest);
+        AuthResponse result = customAuthService.register(registrationRequest);
 
         assertNotNull(result);
         assertEquals(testAccessToken, result.accessToken());
@@ -151,11 +157,14 @@ class CustomAuthServiceTest {
 
     @Test
     void register_WithExistingUser_ShouldThrowAlreadyExistsException() {
-        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
+        RegistrationRequest registrationRequest = new RegistrationRequest(
+                testEmail, testPassword, testName,
+                testSurname,
+                null);
 
         when(userRepository.existsByEmail(testEmail)).thenReturn(true);
 
-        assertThrows(AlreadyExistsException.class, () -> customAuthService.register(authRequest));
+        assertThrows(AlreadyExistsException.class, () -> customAuthService.register(registrationRequest));
 
         verify(userRepository).existsByEmail(testEmail);
         verify(roleRepository, never()).findByName(any());
@@ -168,12 +177,15 @@ class CustomAuthServiceTest {
 
     @Test
     void register_WhenRoleNotFound_ShouldThrowNotFoundException() {
-        AuthRequest authRequest = new AuthRequest(testEmail, testPassword);
+        RegistrationRequest registrationRequest = new RegistrationRequest(
+                testEmail, testPassword, testName,
+                testSurname,
+                null);
 
         when(userRepository.existsByEmail(testEmail)).thenReturn(false);
         when(roleRepository.findByName(Permission.ROLE_USER)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> customAuthService.register(authRequest));
+        assertThrows(NotFoundException.class, () -> customAuthService.register(registrationRequest));
 
         verify(userRepository).existsByEmail(testEmail);
         verify(roleRepository).findByName(Permission.ROLE_USER);

@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.innowise.authservice.exception.AlreadyExistsException;
 import org.innowise.authservice.model.dto.AuthRequest;
 import org.innowise.authservice.model.dto.AuthResponse;
+import org.innowise.authservice.model.dto.RegistrationRequest;
 import org.innowise.authservice.model.dto.TokenRequest;
 import org.innowise.authservice.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,6 +65,7 @@ public class AuthController {
      * @throws ConstraintViolationException if request validation fails
      */
     @PostMapping("/refresh")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody TokenRequest tokenRequest) {
         AuthResponse response = authService.refresh(tokenRequest);
         return ResponseEntity.ok(response);
@@ -71,14 +74,15 @@ public class AuthController {
     /**
      * Registers a new user in the system and returns initial authentication tokens.
      *
-     * @param authRequest the registration request containing user credentials
+     * @param registrationRequest the registration request containing user credentials
      * @return ResponseEntity containing AuthResponse with access and refresh tokens with HTTP 201 status
-     * @throws AlreadyExistsException if user already exists
+     * @throws AlreadyExistsException       if user already exists
      * @throws ConstraintViolationException if request validation fails
      */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody AuthRequest authRequest) {
-        AuthResponse authResponse = authService.register(authRequest);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        AuthResponse authResponse = authService.register(registrationRequest);
         return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
     }
 }

@@ -1,4 +1,15 @@
 services:
+  api-gateway:
+    build: ./api-gateway
+    container_name: api_gateway
+    env_file: .env
+    ports:
+      - "${GATEWAY_SERVER_PORT}:8083"
+    depends_on:
+      - user-service
+      - auth-service
+      - order-service
+
   user-service:
     build: ./user-service
     container_name: user_service
