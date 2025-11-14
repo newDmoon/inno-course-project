@@ -1,0 +1,21 @@
+server:
+  port: ${SERVER_PORT:8084}
+
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/payment_service
+
+  liquibase:
+    enabled: true
+    change-log: db/changelog/changelog-master.yml
+
+logging:
+  level:
+    liquibase: DEBUG
+
+app:
+  jwt:
+    secret: ${JWT_SECRET_KEY}
