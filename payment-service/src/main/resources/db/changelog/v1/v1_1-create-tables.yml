@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-collection
+      author: Dmitry Novogrodsky
+      changes:
+        - createCollection:
+            collectionName: payments
+
+  - changeSet:
+      id: create-indexes
+      author: Dmitry Novogrodsky
+      changes:
+        - createIndex:
+            collectionName: payments
+            keys: '{user_id: 1}'
+            options: '{name: "idx_user_id"}'
+        - createIndex:
+            collectionName: payments
+            keys: '{order_id: 1}'
+            options: '{name: "idx_order_id"}'
