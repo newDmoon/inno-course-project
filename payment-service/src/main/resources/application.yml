@@ -4,18 +4,30 @@ server:
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+
   data:
     mongodb:
       uri: mongodb://localhost:27017/payment_service
-
   liquibase:
     enabled: true
     change-log: db/changelog/changelog-master.yml
 
-logging:
-  level:
-    liquibase: DEBUG
+  kafka:
+    bootstrap-servers: localhost:9094
+    consumer:
+      group-id: payment-service
+      auto-offset-reset: earliest
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+external:
+  random-number:
+    base-url: https://www.randomnumberapi.com/api/v1.0/random
 
 app:
   jwt:
     secret: ${JWT_SECRET_KEY}
+
