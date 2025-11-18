@@ -38,7 +38,7 @@ class CustomPaymentServiceTest {
     private CustomPaymentService paymentService;
 
     @Test
-    void testDetermineStatus_ReturnsSuccess() {
+    void determineStatus_WhenRandomNumberIsEven_ReturnsSuccess() {
         Mockito.when(randomNumberClient.getRandomInt(1, 100)).thenReturn(42);
 
         PaymentStatus status = paymentService.determineStatus();
@@ -47,7 +47,7 @@ class CustomPaymentServiceTest {
     }
 
     @Test
-    void testDetermineStatus_ReturnsFailed() {
+    void determineStatus_WhenRandomNumberIsOdd_ReturnsSuccess() {
         Mockito.when(randomNumberClient.getRandomInt(1, 100)).thenReturn(41);
 
         PaymentStatus status = paymentService.determineStatus();
@@ -56,7 +56,7 @@ class CustomPaymentServiceTest {
     }
 
     @Test
-    void testProcessOrderEvent() {
+    void processOrderEvent_WhenOrderCreatedEvent_ShouldSavePaymentAndSendEvent() {
         OrderCreatedEvent event = OrderCreatedEvent.builder()
                 .orderId(1L)
                 .userId(10L)
