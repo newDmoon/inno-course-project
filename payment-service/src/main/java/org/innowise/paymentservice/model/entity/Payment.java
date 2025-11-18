@@ -13,7 +13,7 @@ import java.time.Instant;
 @Document
 public class Payment {
     @Id
-    private Long id;
+    private String id;
 
     @Indexed
     private Long orderId;

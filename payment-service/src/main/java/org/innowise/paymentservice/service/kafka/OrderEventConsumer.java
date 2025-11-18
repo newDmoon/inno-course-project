@@ -1,4 +1,4 @@
-package org.innowise.paymentservice.kafka;
+package org.innowise.paymentservice.service.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

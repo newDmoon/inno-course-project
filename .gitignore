@@ -3,6 +3,7 @@
 ##############################
 .env
 *.env
+kafka-data
 
 .mtj.tmp/
 *.class

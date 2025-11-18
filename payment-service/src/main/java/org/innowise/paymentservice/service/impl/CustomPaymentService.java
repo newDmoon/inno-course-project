@@ -3,7 +3,7 @@ package org.innowise.paymentservice.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.innowise.paymentservice.client.RandomNumberClient;
-import org.innowise.paymentservice.kafka.PaymentEventProducer;
+import org.innowise.paymentservice.service.kafka.PaymentEventProducer;
 import org.innowise.paymentservice.mapper.PaymentMapper;
 import org.innowise.paymentservice.model.PaymentStatus;
 import org.innowise.paymentservice.model.dto.event.OrderCreatedEvent;
@@ -40,7 +40,7 @@ public class CustomPaymentService implements PaymentService {
         log.info("Payment processed: {} with status {}", payment.getOrderId(), payment.getStatus());
     }
 
-    private PaymentStatus determineStatus() {
+    PaymentStatus determineStatus() {
         int number = randomNumberClient.getRandomInt(1, 100);
         return (number % 2 == 0) ? PaymentStatus.SUCCESS : PaymentStatus.FAILED;
     }
