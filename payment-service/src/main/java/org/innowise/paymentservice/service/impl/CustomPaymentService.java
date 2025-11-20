@@ -13,6 +13,8 @@ import org.innowise.paymentservice.repository.PaymentRepository;
 import org.innowise.paymentservice.service.PaymentService;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,14 +36,10 @@ public class CustomPaymentService implements PaymentService {
     }
 
     private void processAndSave(Payment payment) {
-        payment.setStatus(determineStatus());
+        payment.setStatus(randomNumberClient.determinePaymentStatus());
+        payment.setTimestamp(Instant.now());
         paymentRepository.save(payment);
 
         log.info("Payment processed: {} with status {}", payment.getOrderId(), payment.getStatus());
-    }
-
-    PaymentStatus determineStatus() {
-        int number = randomNumberClient.getRandomInt(1, 100);
-        return (number % 2 == 0) ? PaymentStatus.SUCCESS : PaymentStatus.FAILED;
     }
 }

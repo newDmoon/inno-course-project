@@ -12,9 +12,9 @@ databaseChangeLog:
       changes:
         - createIndex:
             collectionName: payments
-            keys: '{user_id: 1}'
+            keys: '{userId: 1}'
             options: '{name: "idx_user_id"}'
         - createIndex:
             collectionName: payments
-            keys: '{order_id: 1}'
+            keys: '{orderId: 1}'
             options: '{name: "idx_order_id"}'

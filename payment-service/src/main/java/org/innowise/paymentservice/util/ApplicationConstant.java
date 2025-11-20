@@ -9,4 +9,5 @@ public class ApplicationConstant {
     public static final int PARTITION_COUNT = 1;
     public static final short REPLICATION_FACTOR = 1;
     public static final String GENERATE_NUMBER_QUERY = "%s?min=%d&max=%d&count=1";
+    public static final int DEFAULT_FAILED_RANDOM_VALUE = 1;
 }

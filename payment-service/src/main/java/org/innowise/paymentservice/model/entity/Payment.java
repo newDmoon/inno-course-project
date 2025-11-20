@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Data
-@Document
+@Document(collection = "payments")
 public class Payment {
     @Id
     private String id;
@@ -22,6 +22,6 @@ public class Payment {
     private Long userId;
 
     private PaymentStatus status;
-    private Instant timestamp = Instant.now();
+    private Instant timestamp;
     private BigDecimal paymentAmount;
 }
