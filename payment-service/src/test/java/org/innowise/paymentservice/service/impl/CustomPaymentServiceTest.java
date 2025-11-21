@@ -1,6 +1,7 @@
 package org.innowise.paymentservice.service.impl;
 
 import org.innowise.paymentservice.client.RandomNumberClient;
+import org.innowise.paymentservice.exception.AlreadyExistsException;
 import org.innowise.paymentservice.mapper.PaymentMapper;
 import org.innowise.paymentservice.model.PaymentStatus;
 import org.innowise.paymentservice.model.dto.event.OrderCreatedEvent;
@@ -8,16 +9,24 @@ import org.innowise.paymentservice.model.dto.event.PaymentCreatedEvent;
 import org.innowise.paymentservice.model.entity.Payment;
 import org.innowise.paymentservice.repository.PaymentRepository;
 import org.innowise.paymentservice.service.kafka.PaymentEventProducer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CustomPaymentServiceTest {
@@ -37,56 +46,69 @@ class CustomPaymentServiceTest {
     @InjectMocks
     private CustomPaymentService paymentService;
 
-    @Test
-    void determineStatus_WhenRandomNumberIsEven_ReturnsSuccess() {
-        Mockito.when(randomNumberClient.getRandomInt(1, 100)).thenReturn(42);
+    private OrderCreatedEvent orderEvent;
+    private Payment payment;
+    private PaymentCreatedEvent paymentEvent;
 
-        PaymentStatus status = paymentService.determineStatus();
-
-        assertEquals(PaymentStatus.SUCCESS, status);
-    }
-
-    @Test
-    void determineStatus_WhenRandomNumberIsOdd_ReturnsSuccess() {
-        Mockito.when(randomNumberClient.getRandomInt(1, 100)).thenReturn(41);
-
-        PaymentStatus status = paymentService.determineStatus();
-
-        assertEquals(PaymentStatus.FAILED, status);
-    }
-
-    @Test
-    void processOrderEvent_WhenOrderCreatedEvent_ShouldSavePaymentAndSendEvent() {
-        OrderCreatedEvent event = OrderCreatedEvent.builder()
+    @BeforeEach
+    void setup() {
+        orderEvent = OrderCreatedEvent.builder()
                 .orderId(1L)
                 .userId(10L)
-                .amount(BigDecimal.ONE)
+                .amount(BigDecimal.TEN)
                 .build();
 
-        Payment payment = new Payment();
-        payment.setOrderId(1L);
-        payment.setUserId(10L);
-        payment.setPaymentAmount(BigDecimal.ONE);
+        payment = new Payment();
+        payment.setOrderId(orderEvent.getOrderId());
+        payment.setUserId(orderEvent.getUserId());
+        payment.setPaymentAmount(orderEvent.getAmount());
 
-        Mockito.when(paymentMapper.toEntity(event)).thenReturn(payment);
-
-        Mockito.when(randomNumberClient.getRandomInt(1, 100)).thenReturn(2);
-
-        PaymentCreatedEvent mappedEvent = PaymentCreatedEvent.builder()
-                .orderId(1L)
-                .userId(10L)
-                .amount(BigDecimal.ONE)
+        paymentEvent = PaymentCreatedEvent.builder()
+                .orderId(orderEvent.getOrderId())
+                .userId(orderEvent.getUserId())
+                .amount(orderEvent.getAmount())
                 .status(PaymentStatus.SUCCESS)
-                .timestamp(payment.getTimestamp())
                 .build();
+    }
 
-        Mockito.when(paymentMapper.toPaymentCreatedEvent(payment)).thenReturn(mappedEvent);
+    @Test
+    void processOrderEvent_WhenPaymentAlreadyExists_ShouldSkipProcessing() {
+        when(paymentRepository.findByOrderId(orderEvent.getOrderId()))
+                .thenReturn(Optional.of(new Payment()));
 
-        paymentService.processOrderEvent(event);
+        paymentService.processOrderEvent(orderEvent);
 
-        Mockito.verify(paymentRepository).save(payment);
-        Mockito.verify(producer).sendPaymentEvent(mappedEvent);
+        verify(paymentRepository, never()).save(any());
+    }
 
+    @Test
+    void processOrderEvent_WhenPaymentDoesNotExist_ShouldSavePaymentAndSendEvent() throws Exception {
+        when(paymentRepository.findByOrderId(orderEvent.getOrderId()))
+                .thenReturn(Optional.empty());
+        when(paymentMapper.toEntity(orderEvent)).thenReturn(payment);
+        when(randomNumberClient.determinePaymentStatus()).thenReturn(PaymentStatus.SUCCESS);
+        when(paymentMapper.toPaymentCreatedEvent(payment)).thenReturn(paymentEvent);
+
+        paymentService.processOrderEvent(orderEvent);
+
+        verify(paymentRepository).save(payment);
+        verify(producer).sendPaymentEvent(paymentEvent);
         assertEquals(PaymentStatus.SUCCESS, payment.getStatus());
+    }
+
+    @Test
+    void processOrderEvent_WhenProducerThrowsException_ShouldMarkPaymentFailed() throws Exception {
+        when(paymentRepository.findByOrderId(orderEvent.getOrderId()))
+                .thenReturn(Optional.empty());
+        when(paymentMapper.toEntity(orderEvent)).thenReturn(payment);
+        when(randomNumberClient.determinePaymentStatus()).thenReturn(PaymentStatus.SUCCESS);
+        when(paymentMapper.toPaymentCreatedEvent(payment)).thenReturn(paymentEvent);
+
+        doThrow(new RuntimeException("down")).when(producer).sendPaymentEvent(paymentEvent);
+
+        paymentService.processOrderEvent(orderEvent);
+
+        verify(paymentRepository, times(2)).save(payment);
+        assertEquals(PaymentStatus.FAILED, payment.getStatus());
     }
 }
