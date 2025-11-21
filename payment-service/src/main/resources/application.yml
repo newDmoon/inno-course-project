@@ -1,0 +1,45 @@
+server:
+  port: ${SERVER_PORT:8084}
+
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/payment_service
+  liquibase:
+    enabled: true
+    change-log: db/changelog/changelog-master.yml
+
+  kafka:
+    bootstrap-servers: localhost:9094
+    consumer:
+      group-id: payment-service
+      enable-auto-commit: false
+      auto-offset-reset: latest
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      retries: 10
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+    listener:
+      ack-mode: record
+
+external:
+  random-number:
+    base-url: https://www.randomnumberapi.com/api/v1.0/random
+    min: 1
+    max: 100
+    timeout:
+      read: 3000
+    retry-attempts: 3
+    retry-delay: 2000
+  kafka:
+    retry-attempts: 3
+    retry-delay: 2000
+    timeout: 2000
+
+
