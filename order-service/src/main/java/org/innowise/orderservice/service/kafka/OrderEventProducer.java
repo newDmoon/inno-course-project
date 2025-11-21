@@ -11,19 +11,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderEventProducer {
-
     private final KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate;
 
     public void sendOrderCreatedEvent(OrderCreatedEvent event) {
-        kafkaTemplate.send(ApplicationConstant.TOPIC_CREATE_ORDER, event.orderId().toString(), event)
+        kafkaTemplate.send(ApplicationConstant.TOPIC_CREATE_ORDER, String.valueOf(event.orderId()), event)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
-                        log.error("Failed to send OrderCreatedEvent: {}", event, ex);
-
+                        log.error("Failed to send OrderCreatedEvent {}", event, ex);
                     } else {
-                        log.info("OrderCreatedEvent sent successfully: topic={}, offset={}",
-                                result.getRecordMetadata().topic(),
-                                result.getRecordMetadata().offset());
+                        log.info("OrderCreatedEvent {} sent successfully", event.orderId());
                     }
                 });
     }
