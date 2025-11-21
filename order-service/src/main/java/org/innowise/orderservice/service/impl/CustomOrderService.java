@@ -5,18 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.innowise.orderservice.exception.NotFoundException;
 import org.innowise.orderservice.mapper.OrderMapper;
 import org.innowise.orderservice.model.OrderStatus;
+import org.innowise.orderservice.model.PaymentStatus;
+import org.innowise.orderservice.model.dto.OrderCreatedEvent;
 import org.innowise.orderservice.model.dto.OrderDTO;
 import org.innowise.orderservice.model.dto.OrderFilterDTO;
+import org.innowise.orderservice.model.dto.PaymentCreatedEvent;
 import org.innowise.orderservice.model.entity.Order;
 import org.innowise.orderservice.repository.OrderRepository;
 import org.innowise.orderservice.service.OrderEnrichmentService;
 import org.innowise.orderservice.service.OrderService;
+import org.innowise.orderservice.service.kafka.OrderEventProducer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,6 +32,7 @@ public class CustomOrderService implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final OrderEnrichmentService orderEnrichmentService;
+    private final OrderEventProducer producer;
 
     @Override
     @Transactional
@@ -36,6 +42,9 @@ public class CustomOrderService implements OrderService {
         order.setStatus(OrderStatus.PENDING);
 
         Order savedOrder = orderRepository.save(order);
+
+        OrderCreatedEvent event = new OrderCreatedEvent(savedOrder.getId(), savedOrder.getUserId(), BigDecimal.valueOf(savedOrder.getId()));
+        producer.sendOrderCreatedEvent(event);
 
         return orderEnrichmentService.enrichWithUser(orderMapper.toDTO(savedOrder));
     }
@@ -95,5 +104,21 @@ public class CustomOrderService implements OrderService {
 
         orderRepository.deleteById(id);
         return true;
+    }
+
+    @Override
+    @Transactional
+    public void updateOrderStatusFromPayment(PaymentCreatedEvent paymentCreatedEvent) {
+        Order order = orderRepository.findById(paymentCreatedEvent.orderId())
+                .orElseThrow(() -> new NotFoundException(paymentCreatedEvent.orderId()));
+
+        if (paymentCreatedEvent.paymentStatus() == PaymentStatus.SUCCESS) {
+            order.setStatus(OrderStatus.CONFIRMED);
+        } else {
+            order.setStatus(OrderStatus.CANCELLED);
+        }
+
+        orderRepository.save(order);
+        log.info("Order {} status updated to {}", paymentCreatedEvent.paymentStatus(), order.getStatus());
     }
 }

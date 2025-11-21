@@ -23,4 +23,11 @@ public class ApplicationConstant {
     public static final String INTERNAL_ERROR_CODE = "INTERNAL_ERROR";
     public static final String ACCESS_DENIED_ERROR_CODE = "ACCESS_DENIED";
     public static final String JWT_ERROR_CODE = "JWT_ERROR";
+
+    public static final String TOPIC_CREATE_PAYMENT = "CREATE_PAYMENT";
+    public static final String TOPIC_CREATE_PAYMENT_DLQ = "CREATE_PAYMENT_DLQ";
+    public static final String TOPIC_CREATE_ORDER = "CREATE_ORDER";
+    public static final String TOPIC_CREATE_ORDER_DLQ = "CREATE_ORDER_DLQ";
+    public static final int PARTITION_COUNT = 1;
+    public static final short REPLICATION_FACTOR = 1;
 }

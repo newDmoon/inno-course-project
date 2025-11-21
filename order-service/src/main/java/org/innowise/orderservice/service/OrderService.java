@@ -2,6 +2,7 @@ package org.innowise.orderservice.service;
 
 import org.innowise.orderservice.model.dto.OrderDTO;
 import org.innowise.orderservice.model.dto.OrderFilterDTO;
+import org.innowise.orderservice.model.dto.PaymentCreatedEvent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -54,4 +55,6 @@ public interface OrderService {
      * @return true if the order was successfully deleted, false otherwise
      */
     boolean deleteOrderById(Long id);
+
+    void updateOrderStatusFromPayment(PaymentCreatedEvent paymentCreatedEvent);
 }
