@@ -89,7 +89,7 @@ public class GeneralExceptionHandler {
     }
 
     @ExceptionHandler(EmptyResourceException.class)
-    public ResponseEntity<Object> handleException(EmptyResourceException ex,
+    public ResponseEntity<Object> handleEmptyResourceException(EmptyResourceException ex,
                                                   HttpServletRequest request) {
         log.error("Empty resource failed {}: ", request.getRequestURI());
 
@@ -101,5 +101,20 @@ public class GeneralExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<Object> handleAlreadyExistsException(AlreadyExistsException ex,
+                                                               HttpServletRequest request) {
+        log.warn("Resource already exists at {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ex.getMessage(),
+                HttpStatus.CONFLICT,
+                request.getRequestURI(),
+                ErrorConstant.ALREADY_EXISTS_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
     }
 }

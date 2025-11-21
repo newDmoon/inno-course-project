@@ -16,12 +16,17 @@ spring:
     bootstrap-servers: localhost:9094
     consumer:
       group-id: payment-service
-      auto-offset-reset: earliest
+      enable-auto-commit: false
+      auto-offset-reset: latest
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
     producer:
+      retries: 10
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+    listener:
+      ack-mode: record
 
 external:
   random-number:
@@ -32,4 +37,9 @@ external:
       read: 3000
     retry-attempts: 3
     retry-delay: 2000
+  kafka:
+    retry-attempts: 3
+    retry-delay: 2000
+    timeout: 2000
+
 

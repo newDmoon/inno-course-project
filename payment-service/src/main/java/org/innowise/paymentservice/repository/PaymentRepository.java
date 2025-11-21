@@ -7,14 +7,17 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends MongoRepository<Payment, String> {
-    List<Payment> findByOrderId(Long orderId);
+    Optional<Payment> findByOrderId(Long orderId);
 
     List<Payment> findByUserId(Long userId);
 
     List<Payment> findByStatusIn(List<PaymentStatus> statuses);
 
     List<Payment> findByTimestampBetween(Instant start, Instant end);
+
+    boolean existsByOrderId(Long orderId);
 }

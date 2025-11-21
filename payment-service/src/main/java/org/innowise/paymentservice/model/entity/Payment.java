@@ -15,7 +15,7 @@ public class Payment {
     @Id
     private String id;
 
-    @Indexed
+    @Indexed(unique = true)
     private Long orderId;
 
     @Indexed

@@ -17,4 +17,4 @@ databaseChangeLog:
         - createIndex:
             collectionName: payments
             keys: '{orderId: 1}'
-            options: '{name: "idx_order_id"}'
+            options: '{name: "idx_order_id", unique: true}'

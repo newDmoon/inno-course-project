@@ -10,6 +10,7 @@ import java.time.Instant;
 @Data
 @Builder
 public class PaymentCreatedEvent {
+    private String id;
     private Long orderId;
     private Long userId;
     private PaymentStatus status;
