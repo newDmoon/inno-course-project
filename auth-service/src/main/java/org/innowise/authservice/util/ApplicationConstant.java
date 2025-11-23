@@ -4,6 +4,7 @@ public class ApplicationConstant {
     private ApplicationConstant() {
     }
 
+    public static final String INTERNAL_HEADER = "X-INTERNAL-AUTH";
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String ID = "id";
     public static final String BEARER_PREFIX = "Bearer ";

@@ -63,7 +63,7 @@ public class CustomAuthService implements AuthService {
 
         UserDTO createdUser = null;
         try {
-            createdUser = userClient.createUser(registrationRequest);
+            createdUser = userClient.createUser(new UserDTO(null, registrationRequest.email(), registrationRequest.name(), registrationRequest.surname(), null));
 
             Role userRole = roleRepository.findByName(Permission.ROLE_USER)
                     .orElseThrow(NotFoundException::new);

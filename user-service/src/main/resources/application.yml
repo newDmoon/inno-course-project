@@ -24,3 +24,6 @@ server:
 app:
   jwt:
     secret: "mySecretKeymySecretKeymySecretKeymySecretKey1234567890123456"
+
+security:
+  internal-token: ${INTERNAL_TOKEN:basic-secure}
