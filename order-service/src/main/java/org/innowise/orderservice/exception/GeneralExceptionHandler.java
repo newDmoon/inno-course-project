@@ -153,4 +153,19 @@ public class GeneralExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
     }
+
+    @ExceptionHandler(FetchException.class)
+    public ResponseEntity<Object> handleFetchException(FetchException ex,
+                                                       HttpServletRequest request) {
+        log.error("Failed to fetch user for request {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ApplicationConstant.FETCH_FAILED,
+                HttpStatus.BAD_GATEWAY,
+                request.getRequestURI(),
+                ApplicationConstant.FETCH_ERROR_CODE
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(apiError);
+    }
 }

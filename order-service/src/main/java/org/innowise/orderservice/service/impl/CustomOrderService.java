@@ -37,16 +37,22 @@ public class CustomOrderService implements OrderService {
     @Override
     @Transactional
     public OrderDTO createOrder(OrderDTO orderDTO) {
+        OrderDTO enrichedOrderDTO = orderEnrichmentService.enrichWithUser(orderDTO);
+
         Order order = orderMapper.toEntity(orderDTO);
         order.setCreationDate(LocalDateTime.now());
         order.setStatus(OrderStatus.PENDING);
 
         Order savedOrder = orderRepository.save(order);
 
-        OrderCreatedEvent event = new OrderCreatedEvent(savedOrder.getId(), savedOrder.getUserId(), BigDecimal.valueOf(savedOrder.getId()));
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                savedOrder.getId(),
+                savedOrder.getUserId(),
+                BigDecimal.valueOf(savedOrder.getId())
+        );
         producer.sendOrderCreatedEvent(event);
 
-        return orderEnrichmentService.enrichWithUser(orderMapper.toDTO(savedOrder));
+        return orderEnrichmentService.enrichOrder(orderMapper.toDTO(savedOrder), enrichedOrderDTO.userDTO());
     }
 
     @Override
@@ -87,12 +93,14 @@ public class CustomOrderService implements OrderService {
         Order existingOrder = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(id));
 
+        OrderDTO enrichedOrderDTO = orderEnrichmentService.enrichWithUser(orderDTO);
+
         existingOrder.setUserId(orderDTO.userId());
         existingOrder.setStatus(orderDTO.status());
 
         Order savedOrder = orderRepository.save(existingOrder);
 
-        return orderEnrichmentService.enrichWithUser(orderMapper.toDTO(savedOrder));
+        return orderEnrichmentService.enrichOrder(orderMapper.toDTO(savedOrder), enrichedOrderDTO.userDTO());
     }
 
     @Override

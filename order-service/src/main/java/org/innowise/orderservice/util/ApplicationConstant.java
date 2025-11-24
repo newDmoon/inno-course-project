@@ -16,6 +16,7 @@ public class ApplicationConstant {
     public static final String INTERNAL_SERVER_ERROR = "Internal server error";
     public static final String ENTITY_NOT_FOUND = "Entity not found";
     public static final String ENTITY_WITH_ID_NOT_FOUND = "Entity with id %d not found";
+    public static final String FETCH_FAILED = "Fetch failed";
 
     public static final String NOT_FOUND_ERROR_CODE = "NOT_FOUND";
     public static final String VALIDATION_ERROR_CODE = "VALIDATION";
@@ -23,6 +24,7 @@ public class ApplicationConstant {
     public static final String INTERNAL_ERROR_CODE = "INTERNAL_ERROR";
     public static final String ACCESS_DENIED_ERROR_CODE = "ACCESS_DENIED";
     public static final String JWT_ERROR_CODE = "JWT_ERROR";
+    public static final String FETCH_ERROR_CODE = "FETCH_ERROR";
 
     public static final String TOPIC_CREATE_PAYMENT = "CREATE_PAYMENT";
     public static final String TOPIC_CREATE_PAYMENT_DLQ = "CREATE_PAYMENT_DLQ";
