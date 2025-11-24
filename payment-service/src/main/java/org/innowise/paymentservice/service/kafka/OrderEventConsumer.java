@@ -17,7 +17,7 @@ public class OrderEventConsumer {
     private final PaymentService paymentService;
     private final KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate;
 
-    @KafkaListener(topics = ApplicationConstant.TOPIC_CREATE_ORDER)
+    @KafkaListener(topics = ApplicationConstant.TOPIC_CREATE_ORDER, groupId = "payment-service")
     public void handleOrderEvent(OrderCreatedEvent event) {
         log.info("Received CREATE_ORDER event: {}", event);
 

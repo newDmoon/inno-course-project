@@ -17,14 +17,19 @@ spring:
     consumer:
       group-id: payment-service
       enable-auto-commit: false
-      auto-offset-reset: latest
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
     producer:
-      retries: 10
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 4
       acks: all
       properties:
         enable.idempotence: true
+
     listener:
       ack-mode: record
 
