@@ -88,7 +88,7 @@ public class UserController {
      * @apiNote Example: POST /api/v1/users
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SERVICE')")
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userRequest) {
         UserDTO createdUser = userService.createUser(userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);

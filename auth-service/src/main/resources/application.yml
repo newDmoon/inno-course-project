@@ -3,7 +3,7 @@ server:
 
 services:
   user-service:
-    url: http://localhost:8081
+    url: http://localhost:8080
 
 spring:
   profiles:
@@ -25,3 +25,6 @@ app:
     secret: "mySecretKeymySecretKeymySecretKeymySecretKey1234567890123456"
     access-token-expiration: 900000
     refresh-token-expiration: 864000000
+
+security:
+  internal-token: ${INTERNAL_TOKEN:basic-secure}
