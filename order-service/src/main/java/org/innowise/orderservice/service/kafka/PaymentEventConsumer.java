@@ -19,7 +19,7 @@ public class PaymentEventConsumer {
     public void handlePaymentCreatedEvent(PaymentCreatedEvent event) {
         log.info("Received PaymentCreatedEvent: {}", event);
 
-        if (event == null || event.orderId() == null || event.paymentStatus() == null) {
+        if (event == null || event.getOrderId() == null || event.getStatus() == null) {
             log.error("Invalid event received: {}", event);
             throw new NotFoundException("Invalid PaymentCreatedEvent");
         }

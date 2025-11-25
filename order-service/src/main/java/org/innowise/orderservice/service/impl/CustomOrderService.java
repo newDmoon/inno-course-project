@@ -117,16 +117,16 @@ public class CustomOrderService implements OrderService {
     @Override
     @Transactional
     public void updateOrderStatusFromPayment(PaymentCreatedEvent paymentCreatedEvent) {
-        Order order = orderRepository.findById(paymentCreatedEvent.orderId())
-                .orElseThrow(() -> new NotFoundException(paymentCreatedEvent.orderId()));
+        Order order = orderRepository.findById(paymentCreatedEvent.getOrderId())
+                .orElseThrow(() -> new NotFoundException(paymentCreatedEvent.getOrderId()));
 
-        if (paymentCreatedEvent.paymentStatus() == PaymentStatus.SUCCESS) {
+        if (paymentCreatedEvent.getStatus()== PaymentStatus.SUCCESS) {
             order.setStatus(OrderStatus.CONFIRMED);
         } else {
             order.setStatus(OrderStatus.CANCELLED);
         }
 
         orderRepository.save(order);
-        log.info("Order {} status updated to {}", paymentCreatedEvent.paymentStatus(), order.getStatus());
+        log.info(" {} payment status updated order status to {}", paymentCreatedEvent.getStatus(), order.getStatus());
     }
 }
