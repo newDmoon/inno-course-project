@@ -1,12 +1,16 @@
 package org.innowise.orderservice.service.impl;
 
+import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.innowise.orderservice.client.UserClient;
+import org.innowise.orderservice.exception.FetchException;
+import org.innowise.orderservice.exception.NotFoundException;
 import org.innowise.orderservice.model.dto.OrderDTO;
 import org.innowise.orderservice.model.dto.UserDTO;
 import org.innowise.orderservice.service.OrderEnrichmentService;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -24,12 +28,15 @@ public class CustomOrderEnrichmentService implements OrderEnrichmentService {
     @Override
     @CircuitBreaker(name = "user-service")
     public OrderDTO enrichWithUser(OrderDTO orderDTO) {
-        UserDTO userDTO = null;
+        UserDTO userDTO;
         try {
             userDTO = userClient.getUserById(orderDTO.userId());
+        } catch (feign.FeignException.NotFound e) {
+            throw new NotFoundException(orderDTO.userId());
+        } catch (FeignException.Forbidden e) {
+            throw new AuthorizationDeniedException("Auth exception");
         } catch (Exception e) {
-            log.error("Failed to fetch user info for id={}: {}", orderDTO.userId(), e.getMessage());
-            return enrichOrder(orderDTO, null);
+            throw new FetchException("Failed to fetch user info for id %d".formatted(orderDTO.userId()), e);
         }
 
         return enrichOrder(orderDTO, userDTO);
@@ -66,7 +73,7 @@ public class CustomOrderEnrichmentService implements OrderEnrichmentService {
                 .toList();
     }
 
-    private OrderDTO enrichOrder(OrderDTO order, UserDTO userDTO) {
+    public OrderDTO enrichOrder(OrderDTO order, UserDTO userDTO) {
         return OrderDTO.builder()
                 .id(order.id())
                 .userId(order.userId())

@@ -5,18 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.innowise.orderservice.exception.NotFoundException;
 import org.innowise.orderservice.mapper.OrderMapper;
 import org.innowise.orderservice.model.OrderStatus;
+import org.innowise.orderservice.model.PaymentStatus;
+import org.innowise.orderservice.model.dto.OrderCreatedEvent;
 import org.innowise.orderservice.model.dto.OrderDTO;
 import org.innowise.orderservice.model.dto.OrderFilterDTO;
+import org.innowise.orderservice.model.dto.PaymentCreatedEvent;
 import org.innowise.orderservice.model.entity.Order;
 import org.innowise.orderservice.repository.OrderRepository;
 import org.innowise.orderservice.service.OrderEnrichmentService;
 import org.innowise.orderservice.service.OrderService;
+import org.innowise.orderservice.service.kafka.OrderEventProducer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,17 +32,27 @@ public class CustomOrderService implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final OrderEnrichmentService orderEnrichmentService;
+    private final OrderEventProducer producer;
 
     @Override
     @Transactional
     public OrderDTO createOrder(OrderDTO orderDTO) {
+        OrderDTO enrichedOrderDTO = orderEnrichmentService.enrichWithUser(orderDTO);
+
         Order order = orderMapper.toEntity(orderDTO);
         order.setCreationDate(LocalDateTime.now());
         order.setStatus(OrderStatus.PENDING);
 
         Order savedOrder = orderRepository.save(order);
 
-        return orderEnrichmentService.enrichWithUser(orderMapper.toDTO(savedOrder));
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                savedOrder.getId(),
+                savedOrder.getUserId(),
+                BigDecimal.valueOf(savedOrder.getId())
+        );
+        producer.sendOrderCreatedEvent(event);
+
+        return orderEnrichmentService.enrichOrder(orderMapper.toDTO(savedOrder), enrichedOrderDTO.userDTO());
     }
 
     @Override
@@ -78,12 +93,14 @@ public class CustomOrderService implements OrderService {
         Order existingOrder = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(id));
 
+        OrderDTO enrichedOrderDTO = orderEnrichmentService.enrichWithUser(orderDTO);
+
         existingOrder.setUserId(orderDTO.userId());
         existingOrder.setStatus(orderDTO.status());
 
         Order savedOrder = orderRepository.save(existingOrder);
 
-        return orderEnrichmentService.enrichWithUser(orderMapper.toDTO(savedOrder));
+        return orderEnrichmentService.enrichOrder(orderMapper.toDTO(savedOrder), enrichedOrderDTO.userDTO());
     }
 
     @Override
@@ -95,5 +112,21 @@ public class CustomOrderService implements OrderService {
 
         orderRepository.deleteById(id);
         return true;
+    }
+
+    @Override
+    @Transactional
+    public void updateOrderStatusFromPayment(PaymentCreatedEvent paymentCreatedEvent) {
+        Order order = orderRepository.findById(paymentCreatedEvent.getOrderId())
+                .orElseThrow(() -> new NotFoundException(paymentCreatedEvent.getOrderId()));
+
+        if (paymentCreatedEvent.getStatus()== PaymentStatus.SUCCESS) {
+            order.setStatus(OrderStatus.CONFIRMED);
+        } else {
+            order.setStatus(OrderStatus.CANCELLED);
+        }
+
+        orderRepository.save(order);
+        log.info(" {} payment status updated order status to {}", paymentCreatedEvent.getStatus(), order.getStatus());
     }
 }
