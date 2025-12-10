@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 public interface OrderMapper {
     OrderDTO toDTO(Order order);
 
-    @Mapping(target = "orderItems", ignore = true)
     @Mapping(target = "id", ignore = true)
     Order toEntity(OrderDTO orderDTO);
 }

@@ -53,3 +53,7 @@ resilience4j:
         slidingWindowSize: 10
         failureRateThreshold: 50
         waitDurationInOpenState: 10s
+
+services:
+  front:
+    url: http://localhost:3000
