@@ -3,7 +3,9 @@ server:
 
 services:
   user-service:
-    url: http://localhost:8080
+    url: ${USER_SERVICE_URI:http://localhost:8080}
+  front:
+    url: ${FRONT_SERVICE_URI:http://localhost:3000}
 
 spring:
   profiles:

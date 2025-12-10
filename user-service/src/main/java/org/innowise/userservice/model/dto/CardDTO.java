@@ -17,6 +17,7 @@ public record CardDTO(
         String number,
         @NotNull(message = "Card holder name cannot be null")
         @Size(min = 2, max = 100, message = "Card holder name must be between 2 and 100 characters")
+        @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Card holder name must contain only Latin letters and spaces")
         String holder,
         @NotNull(message = "Expiration date cannot be null")
         @FutureOrPresent(message = "Expiration date must be in the future")

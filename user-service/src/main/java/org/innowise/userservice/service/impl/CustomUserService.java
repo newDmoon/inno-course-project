@@ -17,6 +17,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -70,9 +71,16 @@ public class CustomUserService implements UserService {
     @Transactional
     @CacheEvict(value = ApplicationConstant.USERS, key = "#id")
     public boolean deleteUserById(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new NotFoundException(id);
+        User userToDelete = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(id));
+
+        String currentUserEmail = (String) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+
+        if (userToDelete.getEmail().equals(currentUserEmail)) {
+            throw new IllegalArgumentException("You cannot delete your own account");
         }
+
         userRepository.deleteById(id);
         return !userRepository.existsById(id);
     }

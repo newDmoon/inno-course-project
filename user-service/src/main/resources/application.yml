@@ -27,3 +27,7 @@ app:
 
 security:
   internal-token: ${INTERNAL_TOKEN:basic-secure}
+
+services:
+  front:
+    url: http://localhost:3000
