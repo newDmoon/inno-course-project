@@ -20,7 +20,7 @@ services:
     depends_on:
       - mongo-payment
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/${PAYMENT_DB_NAME}
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo-payment:27017/${PAYMENT_DB_NAME}
 
   user-service:
     build: ./user-service
@@ -30,10 +30,13 @@ services:
       - "${USER_SERVER_PORT}:8080"
     depends_on:
       - postgres-user
+      - redis
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/${USER_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
 
   auth-service:
     build: ./auth-service
@@ -60,6 +63,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-order:5432/${ORDER_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
   postgres-user:
     image: postgres:15

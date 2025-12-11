@@ -3,7 +3,7 @@ server:
 
 user:
   service:
-    url: http://localhost:8080
+    url: ${USER_SERVICE_URI:http://localhost:8080}
 
 spring:
   profiles:
@@ -21,7 +21,7 @@ spring:
       hibernate:
         format_sql: true
   kafka:
-    bootstrap-servers: localhost:9094
+    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
