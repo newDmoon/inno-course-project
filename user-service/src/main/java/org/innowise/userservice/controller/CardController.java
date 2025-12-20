@@ -30,7 +30,6 @@ import java.util.List;
  * @see CardDTO
  */
 @RestController
-@CrossOrigin(origins = "${services.front.url:http://localhost:3000}")
 @RequestMapping("/api/v1/cards")
 @RequiredArgsConstructor
 @Validated

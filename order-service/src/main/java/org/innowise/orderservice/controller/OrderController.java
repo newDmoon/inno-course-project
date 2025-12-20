@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
  * @version 1.0
  */
 @RestController
-@CrossOrigin(origins = "${services.front.url:http://localhost:3000}")
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderController {

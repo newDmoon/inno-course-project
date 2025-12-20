@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "${services.front.url:http://localhost:3000}")
 @RequestMapping("/api/v1/items")
 @RequiredArgsConstructor
 public class ItemController {

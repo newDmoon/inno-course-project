@@ -56,4 +56,15 @@ resilience4j:
 
 services:
   front:
-    url: http://localhost:3000
+    url: ${FRONTEND_CLIENT_URL:http://localhost:3000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always

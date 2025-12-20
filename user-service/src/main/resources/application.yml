@@ -30,4 +30,15 @@ security:
 
 services:
   front:
-    url: http://localhost:3000
+    url: ${FRONTEND_CLIENT_URL:http://localhost:3000}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health

@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
  * @see UserDTO
  */
 @RestController
-@CrossOrigin(origins = "${services.front.url:http://localhost:3000}")
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Validated
