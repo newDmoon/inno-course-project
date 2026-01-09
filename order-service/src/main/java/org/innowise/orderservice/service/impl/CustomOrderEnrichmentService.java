@@ -10,6 +10,7 @@ import org.innowise.orderservice.exception.NotFoundException;
 import org.innowise.orderservice.model.dto.OrderDTO;
 import org.innowise.orderservice.model.dto.UserDTO;
 import org.innowise.orderservice.service.OrderEnrichmentService;
+import org.springframework.data.domain.Page;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +58,8 @@ public class CustomOrderEnrichmentService implements OrderEnrichmentService {
 
         Map<Long, UserDTO> usersMap = new HashMap<>();
         try {
-            List<UserDTO> users = userClient.getUsersByIds(userIds);
+            Page<UserDTO> usersPage = userClient.getUsersByIds(userIds);
+            List<UserDTO> users =usersPage.getContent();
             usersMap = users.stream()
                     .collect(Collectors.toMap(UserDTO::id, u -> u));
         } catch (Exception e) {
@@ -80,6 +82,7 @@ public class CustomOrderEnrichmentService implements OrderEnrichmentService {
                 .status(order.status())
                 .creationDate(order.creationDate())
                 .userDTO(userDTO)
+                .orderItems(order.orderItems())
                 .build();
     }
 }

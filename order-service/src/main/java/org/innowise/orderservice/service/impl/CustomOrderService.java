@@ -40,6 +40,7 @@ public class CustomOrderService implements OrderService {
         OrderDTO enrichedOrderDTO = orderEnrichmentService.enrichWithUser(orderDTO);
 
         Order order = orderMapper.toEntity(orderDTO);
+        orderDTO.orderItems().forEach(order::addItem);
         order.setCreationDate(LocalDateTime.now());
         order.setStatus(OrderStatus.PENDING);
 
@@ -69,8 +70,8 @@ public class CustomOrderService implements OrderService {
     public Page<OrderDTO> getOrders(OrderFilterDTO filter, Pageable pageable) {
         Page<Order> ordersPage;
 
-        if (filter.ids() != null && !filter.ids().isEmpty()) {
-            ordersPage = orderRepository.findAllByIdIn(filter.ids(), pageable);
+        if (filter.userId() != null) {
+            ordersPage = orderRepository.findAllByUserId(filter.userId(), pageable);
         } else if (filter.statuses() != null && !filter.statuses().isEmpty()) {
             ordersPage = orderRepository.findAllByStatusIn(filter.statuses(), pageable);
         } else {

@@ -3,8 +3,10 @@ package org.innowise.orderservice.model.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.innowise.orderservice.model.OrderStatus;
+import org.innowise.orderservice.model.entity.OrderItem;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Builder
 public record OrderDTO(
@@ -14,5 +16,7 @@ public record OrderDTO(
         @NotNull(message = "Status is required")
         OrderStatus status,
         UserDTO userDTO,
+        @NotNull
+        ArrayList<OrderItem> orderItems,
         LocalDateTime creationDate) {
 }

@@ -14,15 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -92,7 +84,7 @@ public class CardController {
      * @apiNote Example: POST /api/v1/cards
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<CardDTO> createCard(@Valid @RequestBody CardDTO cardRequest) {
         CardDTO createdCard = cardService.createCard(cardRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCard);
@@ -108,7 +100,7 @@ public class CardController {
      * @apiNote Example: PUT /api/v1/cards
      */
     @PutMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<CardDTO> updateCard(@Valid @RequestBody CardDTO updateCardRequest) {
         cardService.updateCardById(updateCardRequest);
         return ResponseEntity.noContent().build();
@@ -123,7 +115,7 @@ public class CardController {
      * @apiNote Example: DELETE /api/v1/cards/123
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> deleteCard(@PathVariable(ApplicationConstant.ID) @Positive Long id) {
         cardService.deleteCardById(id);
         return ResponseEntity.noContent().build();

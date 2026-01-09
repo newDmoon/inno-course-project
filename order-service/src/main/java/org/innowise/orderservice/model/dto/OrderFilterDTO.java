@@ -5,6 +5,6 @@ import org.innowise.orderservice.model.OrderStatus;
 import java.util.List;
 
 public record OrderFilterDTO(
-        List<Long> ids,
+        Long userId,
         List<OrderStatus> statuses) {
 }

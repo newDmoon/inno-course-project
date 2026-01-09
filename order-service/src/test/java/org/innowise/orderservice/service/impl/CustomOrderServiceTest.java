@@ -54,13 +54,13 @@ class CustomOrderServiceTest {
         userId = 100L;
         creationDate = LocalDateTime.now();
         orderEntity = createOrderEntity();
-        orderDTO = new OrderDTO(orderId, userId, OrderStatus.PENDING, null, creationDate);
+        orderDTO = new OrderDTO(orderId, userId, OrderStatus.PENDING, null,null, creationDate);
     }
 
     @Test
     void createOrder_ShouldCreateOrderSuccessfully() {
-        OrderDTO inputDTO = new OrderDTO(null, userId, OrderStatus.PENDING, null, null);
-        OrderDTO expectedDTO = new OrderDTO(orderId, userId, OrderStatus.PENDING, null, creationDate);
+        OrderDTO inputDTO = new OrderDTO(null, userId, OrderStatus.PENDING, null, null, null);
+        OrderDTO expectedDTO = new OrderDTO(orderId, userId, OrderStatus.PENDING, null,null, creationDate);
 
         when(orderMapper.toEntity(inputDTO)).thenReturn(orderEntity);
         when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
@@ -97,7 +97,7 @@ class CustomOrderServiceTest {
     @Test
     void getOrders_WithIdsFilter_ShouldReturnFilteredOrders() {
         Pageable pageable = PageRequest.of(0, 10);
-        OrderFilterDTO filter = new OrderFilterDTO(List.of(1L, 2L), null);
+        OrderFilterDTO filter = new OrderFilterDTO(1L, null);
         Page<Order> orderPage = new PageImpl<>(List.of(orderEntity), pageable, 1);
 
         when(orderRepository.findAllByIdIn(anyList(), any(Pageable.class))).thenReturn(orderPage);
@@ -107,7 +107,7 @@ class CustomOrderServiceTest {
         Page<OrderDTO> result = orderService.getOrders(filter, pageable);
 
         assertEquals(1, result.getContent().size());
-        verify(orderRepository).findAllByIdIn(filter.ids(), pageable);
+        verify(orderRepository).findAllByUserId(filter.userId(), pageable);
         verify(orderRepository, never()).findAllByStatusIn(any(), any());
         verify(orderRepository, never()).findAll(any(Pageable.class));
     }
@@ -150,8 +150,8 @@ class CustomOrderServiceTest {
 
     @Test
     void updateOrderById_WhenOrderExists_ShouldUpdateOrder() {
-        OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, creationDate);
-        OrderDTO expectedDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, creationDate);
+        OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, null, creationDate);
+        OrderDTO expectedDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, null, creationDate);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(orderEntity));
         when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
@@ -167,7 +167,7 @@ class CustomOrderServiceTest {
 
     @Test
     void updateOrderById_WhenOrderNotExists_ShouldThrowNotFoundException() {
-        OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, creationDate);
+        OrderDTO updateDTO = new OrderDTO(orderId, userId, OrderStatus.CONFIRMED, null, null, creationDate);
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> orderService.updateOrderById(orderId, updateDTO));

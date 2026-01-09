@@ -40,7 +40,7 @@ public class CustomAuthService implements AuthService {
     @Override
     public AuthResponse login(AuthRequest request) {
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new NotFoundException(request.email()));
+                .orElseThrow(NotFoundException::new);
 
         if (!encoder.matches(request.password(), user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid credentials");
@@ -63,7 +63,7 @@ public class CustomAuthService implements AuthService {
 
         UserDTO createdUser = null;
         try {
-            createdUser = userClient.createUser(new UserDTO(null, registrationRequest.email(), registrationRequest.name(), registrationRequest.surname(), null));
+            createdUser = userClient.createUser(new UserDTO(null, registrationRequest.email(), registrationRequest.name(), registrationRequest.surname(), registrationRequest.birthDate()));
 
             Role userRole = roleRepository.findByName(Permission.ROLE_USER)
                     .orElseThrow(NotFoundException::new);

@@ -183,4 +183,20 @@ public class GeneralExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex,
+                                                                 HttpServletRequest request) {
+        log.warn("Illegal argument error occurred at {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ApiError apiError = ApiError.of(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI(),
+                ErrorConstant.VALIDATION_FAILED
+                );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
 }

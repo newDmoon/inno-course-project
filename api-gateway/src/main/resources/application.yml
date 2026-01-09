@@ -28,13 +28,72 @@ spring:
           predicates:
             - Path=/api/v1/auth/login, /api/v1/auth/register
 
-        - id: order-service
+        - id: order-service-protected
           uri: ${ORDER_SERVICE_URI:http://order-service:8082}
           predicates:
             - Path=/api/v1/orders/**
           filters:
             - name: JwtFilter
 
+        - id: order-service-public
+          uri: ${ORDER_SERVICE_URI:http://order-service:8082}
+          predicates:
+            - Path=/api/v1/items/**
+
+        - id: user-service-health
+          uri: ${USER_SERVICE_URI:http://user-service:8080}
+          predicates:
+            - Path=/actuator/user/**
+          filters:
+            - StripPrefix=1
+
+        - id: auth-service-health
+          uri: ${AUTH_SERVICE_URI:http://auth-service:8081}
+          predicates:
+            - Path=/actuator/auth/**
+          filters:
+            - StripPrefix=1
+
+        - id: order-service-health
+          uri: ${ORDER_SERVICE_URI:http://order-service:8082}
+          predicates:
+            - Path=/actuator/order/**
+          filters:
+            - StripPrefix=1
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+            allowCredentials: true
+
 app:
   jwt:
     secret: ${JWT_SECRET_KEY}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, gateway
+      cors:
+        allowed-origins: ${FRONTEND_CLIENT_URL:"http://localhost:3000"}
+        allowed-methods: "GET, POST, OPTIONS"
+        allowed-headers: "*"
+        allow-credentials: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+    gateway:
+      enabled: true
