@@ -171,7 +171,7 @@ services:
       - "4318:4318"
 
   prometheus:
-    image: prom/prometheus:v2.49.0
+    image: prom/prometheus:v3.5.0
     container_name: prometheus
     volumes:
       - ./infra/prometheus.yml:/etc/prometheus/prometheus.yml
