@@ -37,7 +37,7 @@ public class ApplicationConfiguration {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/swagger/**",
-                                "/actuator/health/**"
+                                "/actuator/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
