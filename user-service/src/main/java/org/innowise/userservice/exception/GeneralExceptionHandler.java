@@ -97,6 +97,13 @@ public class GeneralExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex,
                                                   HttpServletRequest request) {
+        if (request.getRequestURI().startsWith("/actuator")) {
+            log.error("Actuator error at {}: {}", request.getRequestURI(), ex.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ex.getMessage());
+        }
+
         log.error("Unexpected error occurred at {}: ", request.getRequestURI(), ex);
 
         ApiError apiError = ApiError.of(

@@ -23,6 +23,11 @@ public class InternalServiceAuthFilter extends OncePerRequestFilter {
     private String internalToken;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/actuator");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String internalHeader = request.getHeader(ApplicationConstant.INTERNAL_HEADER);
 

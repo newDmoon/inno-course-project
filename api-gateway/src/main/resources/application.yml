@@ -40,27 +40,6 @@ spring:
           predicates:
             - Path=/api/v1/items/**
 
-        - id: user-service-health
-          uri: ${USER_SERVICE_URI:http://user-service:8080}
-          predicates:
-            - Path=/actuator/user/**
-          filters:
-            - StripPrefix=1
-
-        - id: auth-service-health
-          uri: ${AUTH_SERVICE_URI:http://auth-service:8081}
-          predicates:
-            - Path=/actuator/auth/**
-          filters:
-            - StripPrefix=1
-
-        - id: order-service-health
-          uri: ${ORDER_SERVICE_URI:http://order-service:8082}
-          predicates:
-            - Path=/actuator/order/**
-          filters:
-            - StripPrefix=1
-
       globalcors:
         cors-configurations:
           '[/**]':
@@ -97,3 +76,15 @@ management:
       show-details: always
     gateway:
       enabled: true
+
+otel:
+  exporter:
+    otlp:
+      endpoint: ${TEMPO_SERVICE_URL:http://tempo:4317}
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+
